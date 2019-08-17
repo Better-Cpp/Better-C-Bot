@@ -1,1 +1,1 @@
-# CPPRefBot
+# Better C++ Bot
