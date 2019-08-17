@@ -1,0 +1,17 @@
+{
+    "rules": {
+        "1": "We're open-minded about every talk but don't turn every channel into #lobby when someone needs help.",
+        "2": "We will ban you without warning if you're being mean to people, in particular beginners.",
+        "3": "Trolling is fine but you need to keep in mind it has to be funny for everybody.",
+        "4": "Ask your question instead of asking for permission to ask it.",
+        "5": "For real though, ask your question.",
+        "6": "Be polite to everybody.",
+        "7": "Use the code formatting of discord, it's easier for us to read you like this :\n```cpp\n#include <iostream>\nint main() {\n\tstd::cout << \"Hello World\" << std::endl;\n}\n```\n->\n\\`\\`\\`cpp\n#include <iostream>\nint main()\n {\n\tstd::cout << \"Hello World\" << std::endl;\n}\\`\\`\\`",
+        "8": "The only way to get access to the server is to type .accept in #arrival",
+        "9": "We don't do your homework, so use your brain and the help provided. We'll point you in the right direction most of the time.",
+        "10": "The CPPreference bot is used like this `.cppref strcpy` where `strcpy` is what you need to find, it will retrieve the link of the cppreference website and post it in the channel.",
+        "11": "Don't ping us unless there is an issue that needs an admin to be solved. (If you do, I'll warn you, then ban you).",
+        "12": "Ask people before going into private messages."
+    },
+    "permitted": [553478921870508061]
+}
