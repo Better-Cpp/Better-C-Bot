@@ -12,7 +12,7 @@ from cogs import help
 from cogs import qt
 
 def prefix(bot, message):
-    return [".", "!"]
+    return [".", "++"]
 
 bot = commands.Bot(prefix, case_insensitive=True)
 
