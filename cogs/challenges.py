@@ -52,7 +52,11 @@ class Challenges(commands.Cog):
 
     @commands.command()
     async def challenges(self, ctx, *):
-        trigger_role(ctx.author, "challenges", ctx.guild)
+        result = await trigger_role(ctx.author, "challenges", ctx.guild)
+        if result == True:
+            await ctx.send("Added challenges role.")
+        else:
+            await ctx.send("Removed challenges role.")
 
 
 def setup(bot):
