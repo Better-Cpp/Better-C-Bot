@@ -3,6 +3,8 @@ import discord
 
 import datetime
 
+from typing import *
+
 
 async def trigger_role(member: discord.Member, role: Union[discord.Role, int, str], guild: Optional[discord.Guild] = None) -> bool:
     """
