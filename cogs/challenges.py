@@ -51,7 +51,7 @@ class Challenges(commands.Cog):
     """Cog to handle the challenges command"""
 
     @commands.command()
-    async def challenges(self, ctx, *):
+    async def challenges(self, ctx):
         result = await trigger_role(ctx.author, "challenges", ctx.guild)
         if result == True:
             await ctx.send("Added challenges role.")
