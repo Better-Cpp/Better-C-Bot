@@ -10,6 +10,7 @@ from cogs import cpp
 from cogs import rules
 from cogs import help
 from cogs import qt
+from cogs import challenges
 
 def prefix(bot, message):
     return [".", "++"]
@@ -55,4 +56,5 @@ cpp.setup(bot)
 help.setup(bot)
 qt.setup(bot)
 rules.setup(bot)
+challenges.setup(bot)
 bot.run("NTgzMjI4MzgxNDc5NTY3Mzkw.XO5UWw.etuGsVBxp9UbUVZyPyB8xKYZLYw")
