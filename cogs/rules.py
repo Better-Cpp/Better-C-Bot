@@ -91,6 +91,8 @@ class RulesEnforcer(commands.Cog, name="Rules"):
         for cog in self.bot.user_cogs:
             self.bot.reload_extension(f"cogs/{cog}")
 
+        await ctx.send("Updated cogs:\n```\n{}\n```".format('\n'.join(bot.user_cogs)))
+
     @commands.command()
     async def lmgtfy(self, ctx, *, term):
         await ctx.send(f"https://lmgtfy.com/?q={term.replace(' ', '+')}")
