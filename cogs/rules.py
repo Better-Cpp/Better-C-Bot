@@ -5,6 +5,7 @@ import json
 import inspect
 import textwrap
 import importlib
+import traceback
 from contextlib import redirect_stdout
 
 from discord.ext import commands
@@ -91,7 +92,7 @@ class RulesEnforcer(commands.Cog, name="Rules"):
         for cog in self.bot.user_cogs:
             self.bot.reload_extension(f"cogs/{cog}")
 
-        await ctx.send("Updated cogs:\n```\n{}\n```".format('\n'.join(bot.user_cogs)))
+        await ctx.send("Updated cogs:\n```\n{}\n```".format('\n'.join(self.bot.user_cogs)))
 
     @commands.command()
     async def lmgtfy(self, ctx, *, term):
