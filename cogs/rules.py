@@ -10,6 +10,7 @@ from contextlib import redirect_stdout
 from discord.ext import commands
 import discord
 
+
 class RulesEnforcer(commands.Cog, name="Rules"):
     def __init__(self, bot):
         self.bot = bot
@@ -62,7 +63,6 @@ class RulesEnforcer(commands.Cog, name="Rules"):
         if not self.has_role(583646707938623489, ctx.author):
             return await ctx.send("Only staff may use this command")
 
-        
         role = discord.utils.get(ctx.guild.roles, name="muted")
         if role is None:
             role = await ctx.guild.create_role(name="muted")
@@ -78,6 +78,22 @@ class RulesEnforcer(commands.Cog, name="Rules"):
 
         # remove `foo`
         return content.strip('` \n')
+
+    @commands.command()
+    async def reload(self, ctx):
+        def get_permitted():
+            with open("backend/database.json", 'r') as file:
+                return json.load(file)["permitted"]
+
+        if ctx.message.author.id not in get_permitted():
+            return await ctx.send("You do not have authorization to use this command")
+
+        for cog in self.bot.user_cogs:
+            self.bot.reload_extension(f"cogs/{cog}")
+
+    @commands.command()
+    async def lmgtfy(self, ctx, *, term):
+        await ctx.send(f"https://lmgtfy.com/?q={term.replace(' ', '+')}")
 
     @commands.command(hidden=True, name='eval')
     async def _eval(self, ctx, *, body: str):
@@ -132,7 +148,6 @@ class RulesEnforcer(commands.Cog, name="Rules"):
             else:
                 self._last_result = ret
                 await ctx.send(f'```py\n{value}{ret}\n```')
-
 
 
 def setup(bot):

@@ -52,9 +52,7 @@ async def accept(ctx):
     )
     await ctx.author.send(f"Welcome to Better C++.")
 
-cpp.setup(bot)
-help.setup(bot)
-qt.setup(bot)
-rules.setup(bot)
-challenges.setup(bot)
+bot.user_cogs = ["cogs.cpp", "cogs.help", "cogs.qt", "cogs.rules", "cogs.challenges"]
+for cog in bot.user_cogs:
+    bot.load_extension(cog)
 bot.run("NTgzMjI4MzgxNDc5NTY3Mzkw.XO5UWw.etuGsVBxp9UbUVZyPyB8xKYZLYw")
