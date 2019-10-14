@@ -20,7 +20,10 @@ bot = commands.Bot(prefix, case_insensitive=True)
 
 @bot.event
 async def on_ready():
-    # await bot.user.edit(username="Better C++ Bot", avatar=open("/home/john/Downloads/c++.png", 'rb').read())
+    bot.user_cogs = ["cogs.cpp", "cogs.help", "cogs.qt", "cogs.rules", "cogs.challenges"]
+    for cog in bot.user_cogs:
+        bot.load_extension(cog)
+
     print('Logged in as')
     print(bot.user.name)
     print(bot.user.id)
@@ -52,7 +55,7 @@ async def accept(ctx):
     )
     await ctx.author.send(f"Welcome to Better C++.")
 
-bot.user_cogs = ["cogs.cpp", "cogs.help", "cogs.qt", "cogs.rules", "cogs.challenges"]
-for cog in bot.user_cogs:
-    bot.load_extension(cog)
-bot.run("NTgzMjI4MzgxNDc5NTY3Mzkw.XO5UWw.etuGsVBxp9UbUVZyPyB8xKYZLYw")
+with open("token.txt", 'r') as file:
+    TOKEN = file.read().strip()
+
+bot.run(TOKEN)
