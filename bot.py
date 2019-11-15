@@ -58,12 +58,6 @@ async def accept(ctx):
 @bot.command()
 async def members(ctx):
     await ctx.send(ctx.guild.member_count)
-                       
-cpp.setup(bot)
-help.setup(bot)
-qt.setup(bot)
-rules.setup(bot)
-challenges.setup(bot)
 
 with open("token.txt", 'r') as file:
     TOKEN = file.read().strip()
