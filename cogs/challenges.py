@@ -3,6 +3,8 @@ import discord
 
 import datetime
 
+from typing import *
+
 
 async def trigger_role(member: discord.Member, role: Union[discord.Role, int, str], guild: Optional[discord.Guild] = None) -> bool:
     """
@@ -51,7 +53,7 @@ class Challenges(commands.Cog):
     """Cog to handle the challenges command"""
 
     @commands.command()
-    async def challenges(self, ctx, *):
+    async def challenges(self, ctx):
         result = await trigger_role(ctx.author, "challenges", ctx.guild)
         if result == True:
             await ctx.send("Added challenges role.")
