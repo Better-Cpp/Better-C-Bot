@@ -20,7 +20,7 @@ bot = commands.Bot(prefix, case_insensitive=True)
 
 @bot.event
 async def on_ready():
-    bot.user_cogs = ["cogs.cpp", "cogs.help", "cogs.qt", "cogs.rules", "cogs.challenges"]
+    bot.user_cogs = ["cogs.verona", "cogs.cpp", "cogs.help", "cogs.qt", "cogs.rules", "cogs.challenges"]
     for cog in bot.user_cogs:
         bot.load_extension(cog)
 
