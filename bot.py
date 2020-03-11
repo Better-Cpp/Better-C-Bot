@@ -43,18 +43,15 @@ async def on_member_join(member):
     if rules_channel is None:
         return print("Couldn't find rules channel")
     await channel.send(f"{member.mention}, welcome to Better C++. Please read {rules_channel.mention} for instructions on how to get access to the rest of the channels.\nCreated at: {member.created_at.isoformat(' ', 'seconds')}")
-        
-    await ctx.author.add_roles(
-        discord.utils.get(ctx.guild.roles, id=686647531450400823)
-    )
+
 
 @bot.command()
 async def accept(ctx):
     if not ctx.channel.id == 583251191866195969:
         return
     await ctx.message.delete()
-    await ctx.author.remove_roles(
-        discord.utils.get(ctx.guild.roles, id=686647531450400823)
+    await ctx.author.add_roles(
+        discord.utils.get(ctx.guild.roles, id=583254844677160980)
     )
     await ctx.author.send(f"Welcome to Better C++.")
 
