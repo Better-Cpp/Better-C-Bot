@@ -87,6 +87,13 @@ class cpp(commands.Cog, name="C++"):
             name='See More', value=f'[`{discord.utils.escape_markdown(query)}` results]({url})')
         await ctx.send(embed=e)
 
+    @commands.command()
+    async def lectures(self, ctx):
+        role = ctx.guild.get_role(695993548939722823)
+        if role is None:
+            return await ctx.send("Failed to find lectures role")
+        await ctx.author.add_roles(role)
+        await ctx.send("Gave you the role!")
 
 def setup(bot):
     bot.add_cog(cpp(bot))
