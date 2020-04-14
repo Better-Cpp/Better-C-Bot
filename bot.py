@@ -11,6 +11,7 @@ from cogs import rules
 from cogs import help
 from cogs import qt
 from cogs import challenges
+from cogs import stats
 
 def prefix(bot, message):
     return [".", "++"]
@@ -20,17 +21,25 @@ bot = commands.Bot(prefix, case_insensitive=True)
 
 @bot.event
 async def on_ready():
-    bot.user_cogs = ["cogs.verona", "cogs.cpp", "cogs.help", "cogs.qt", "cogs.rules", "cogs.challenges"]
+    bot.user_cogs = [
+        # "cogs.verona", 
+        "cogs.cpp", 
+        "cogs.help", 
+        "cogs.qt", 
+        "cogs.rules", 
+        "cogs.challenges", 
+        "cogs.stats"
+        ]
     for cog in bot.user_cogs:
         bot.load_extension(cog)
+
+    bot.http_client = aiohttp.ClientSession()
 
     print('Logged in as')
     print(bot.user.name)
     print(bot.user.id)
     print('------')
     print(discord.utils.oauth_url(bot.user.id))
-
-
 
 @bot.event
 async def on_member_join(member):
@@ -44,20 +53,6 @@ async def on_member_join(member):
         return print("Couldn't find rules channel")
     await channel.send(f"{member.mention}, welcome to Better C++. Please read {rules_channel.mention} for instructions on how to get access to the rest of the channels.\nCreated at: {member.created_at.isoformat(' ', 'seconds')}")
 
-
-@bot.command()
-async def accept(ctx):
-    if not ctx.channel.id == 583251191866195969:
-        return
-    await ctx.message.delete()
-    await ctx.author.add_roles(
-        discord.utils.get(ctx.guild.roles, id=583254844677160980)
-    )
-    await ctx.author.send(f"Welcome to Better C++.")
-
-@bot.command()
-async def members(ctx):
-    await ctx.send(ctx.guild.member_count)
 
 with open("token.txt", 'r') as file:
     TOKEN = file.read().strip()

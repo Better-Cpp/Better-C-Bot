@@ -22,7 +22,7 @@ class Help(commands.Cog):
     def format_help_for(self, item):
         embed = discord.Embed(colour=discord.Colour.blurple(),
                               timestamp=datetime.datetime.utcnow())
-        embed.set_footer(text=f"Use !help <command> for more information.")
+        embed.set_footer(text=f"Use .help <command> for more information.")
         if isinstance(item, commands.Cog):
             embed.title = item.qualified_name
             embed.description = type(item).__doc__ or "Nothing provided."
