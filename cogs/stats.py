@@ -44,6 +44,7 @@ class Statistics(commands.Cog):
             'socket_send': self.socket_send,
             'reactions_add': self.reactions_add,
             'reactions_remove': self.reactions_remove   
+            'total_member_count': self.bot.get_guild(583251190591258624).member_count
         }
 
         async with self.bot.http_client.post("https://enqpjmkmtmwme.x.pipedream.net/", data=data) as response:
