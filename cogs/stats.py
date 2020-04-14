@@ -43,7 +43,7 @@ class Statistics(commands.Cog):
             'socket_recv': self.socket_recv,
             'socket_send': self.socket_send,
             'reactions_add': self.reactions_add,
-            'reactions_remove': self.reactions_remove   
+            'reactions_remove': self.reactions_remove,
             'total_member_count': self.bot.get_guild(583251190591258624).member_count
         }
 
