@@ -7,7 +7,7 @@ import datetime
 class Statistics(commands.Cog):
     """
     Cog to handle statistics for the server
-    Posts every day at 2 am
+    Posts every day at midnight
     """
 
     def __init__(self, bot):
