@@ -13,6 +13,7 @@ class Statistics(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.reset_stats()
+        self.post_statistics.start()
 
     def reset_stats(self):
         self.joined_count = 0
@@ -28,7 +29,7 @@ class Statistics(commands.Cog):
         self.reactions_add = 0
         self.reactions_remove = 0
 
-    @tasks.loop(hours=24.0)
+    @tasks.loop(hours=24)
     async def post_statistics(self):
 
         data = {
