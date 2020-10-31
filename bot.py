@@ -16,7 +16,7 @@ from cogs import stats
 def prefix(bot, message):
     return [".", "++"]
 
-bot = commands.Bot(prefix, case_insensitive=True)
+bot = commands.Bot(prefix, case_insensitive=True, intents=discord.Intents.all())
 
 
 @bot.event
