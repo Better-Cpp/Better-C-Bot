@@ -35,7 +35,7 @@ class Qt(commands.Cog, name="Qt"):
         await ctx.send(embed=e)
 
     def get_qt_hits(self) -> dict:
-        with open("backend/qt5.json", 'r') as file:
+        with open("src/backend/qt5.json", 'r') as file:
             return json.load(file)
 
 

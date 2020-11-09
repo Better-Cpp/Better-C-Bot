@@ -5,7 +5,7 @@ import datetime
 
 import discord
 from discord.ext import commands
-from backend import verona
+from ..backend import verona
 
 
 class Verona(commands.Cog, name="Verona"):

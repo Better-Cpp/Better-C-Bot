@@ -30,7 +30,7 @@ class cpp(commands.Cog, name="C++"):
             query = query.replace("std::", "")
         query = query.replace("::", "/")
         output = []
-        to_queue = list(self.get_directory_files(query, "w/cpp/**"))
+        to_queue = list(self.get_directory_files(query, "src/cppref/cpp/**"))
         for index, each in enumerate(to_queue):
             if each.endswith(".html"):
                 continue
@@ -51,19 +51,19 @@ class cpp(commands.Cog, name="C++"):
         special_pages = []
         description = []
         q = query.replace('std::', '')
-        if os.path.isdir(f"w/cpp/{q}"):
+        if os.path.isdir(f"src/cppref/cpp/{q}"):
             description.append(
                 f"[`std::{q}`](http://en.cppreference.com/w/cpp/{q})")
         for _, result in enumerate(results):
             check_name = result.replace("http://en.cppreference.com/", "")
-            if check_name.startswith("w/cpp/container"):
+            if check_name.startswith("src/cppref/cpp/container"):
                 check_name = check_name[:5] + check_name[15:]
-            if check_name.startswith("w/cpp/algorithm"):
+            if check_name.startswith("src/cppref/cpp/algorithm"):
                 check_name = check_name[:5] + check_name[15:]
-            if check_name.startswith("w/cpp/memory"):
+            if check_name.startswith("src/cppref/cpp/memory"):
                 check_name = check_name[:5] + check_name[12:]
             f_name = check_name[6:].replace("\\", "::").replace(".html", "")
-            if check_name.startswith(("w/cpp/language", "w/cpp/concept")):
+            if check_name.startswith(("src/cppref/cpp/language", "src/cppref/cpp/concept")):
                 special_pages.append(f'[`{f_name.replace("/", "::")}`]({result})')
                 continue
 
