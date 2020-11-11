@@ -25,7 +25,7 @@ class RulesEnforcer(commands.Cog, name="Rules"):
         except ValueError:
             return await ctx.send(f"Invalid rule number: `{number}`")
 
-        with open("backend/database.json") as file:
+        with open("src/backend/database.json") as file:
             j = json.load(file)
 
         await ctx.send(f"**Rule {number}**:\n{j['rules'][number]}")
@@ -83,7 +83,7 @@ class RulesEnforcer(commands.Cog, name="Rules"):
     @commands.command()
     async def reload(self, ctx):
         def get_permitted():
-            with open("backend/database.json", 'r') as file:
+            with open("src/backend/database.json", 'r') as file:
                 return json.load(file)["permitted"]
 
         if ctx.message.author.id not in get_permitted():
@@ -103,7 +103,7 @@ class RulesEnforcer(commands.Cog, name="Rules"):
         """Evaluates code"""
 
         def get_permitted():
-            with open("backend/database.json", 'r') as file:
+            with open("src/backend/database.json", 'r') as file:
                 return json.load(file)["permitted"]
 
         if ctx.message.author.id not in get_permitted():
