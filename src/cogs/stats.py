@@ -109,17 +109,5 @@ class Statistics(commands.Cog):
     async def members(self, ctx):
         await ctx.send(ctx.guild.member_count)
 
-    @commands.command()
-    async def accept(self, ctx):
-        if not ctx.channel.id == 583251191866195969:
-            return
-        await ctx.message.delete()
-        await ctx.author.add_roles(
-            ctx.guild.get_role(583254844677160980)
-        )
-        await ctx.author.send(f"Welcome to Better C++.")
-        self.accept_count += 1
-
-
 def setup(bot):
     bot.add_cog(Statistics(bot))
