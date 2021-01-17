@@ -73,7 +73,7 @@ class Playground(commands.Cog):
         await self.send_playground(ctx, mode, code.source, warnings=True)
 
     @commands.command()
-    async def eval(self, ctx: commands.Context, *, arg):
+    async def rust(self, ctx: commands.Context, *, arg):
         """Evaluates Rust code and debug prints the results. Exactly equal to https://play.rust-lang.org/"""
         (mode, code) = self.parse_args(arg)
         comment_index = code.source.find("//")
