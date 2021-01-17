@@ -1,8 +1,8 @@
-from discord.ext import commands, tasks
-import discord
 import asyncio
+from discord.ext import commands, tasks
 
 import datetime
+
 
 class Statistics(commands.Cog):
     """
@@ -84,7 +84,7 @@ class Statistics(commands.Cog):
     @commands.Cog.listener()
     async def on_raw_reaction_add(self, payload):
         self.reactions_add += 1
-    
+
     @commands.Cog.listener()
     async def on_raw_reactions_remove(self, payload):
         self.reactions_remove += 1
@@ -108,6 +108,7 @@ class Statistics(commands.Cog):
     @commands.command()
     async def members(self, ctx):
         await ctx.send(ctx.guild.member_count)
+
 
 def setup(bot):
     bot.add_cog(Statistics(bot))

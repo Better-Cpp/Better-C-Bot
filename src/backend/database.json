@@ -17,5 +17,7 @@
         "15": "I shouldn't have to say that but any NSFW stuff will be deleted, and you'll probably get banned alongside it. Don't post NSFW, this includes sex talk.",
         "16": "POSTING ADVERTISEMENT OF ANY KIND WILL GET YOU BANNED. (Except in #show-off-your-stuff for obvious reasons)"
     },
-    "permitted": [553478921870508061]
+    "permitted": [
+        553478921870508061
+    ]
 }

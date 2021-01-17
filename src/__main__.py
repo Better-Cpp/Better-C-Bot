@@ -1,35 +1,28 @@
 import aiohttp
-import datetime
-from typing import Generator, List
-import io
 import discord
 from discord.ext import commands
-from lxml import etree
 
-from .cogs import cpp
-from .cogs import rules
-from .cogs import help
-from .cogs import qt
-from .cogs import challenges
-from .cogs import stats
 
 def prefix(bot, message):
     return [".", "++"]
 
-bot = commands.Bot(prefix, case_insensitive=True, intents=discord.Intents.all())
+
+bot = commands.Bot(prefix, case_insensitive=True,
+                   intents=discord.Intents.all())
 
 
 @bot.event
 async def on_ready():
     bot.user_cogs = [
-        # "src.cogs.verona", 
-        "src.cogs.cpp", 
-        "src.cogs.help", 
-        "src.cogs.qt", 
-        "src.cogs.rules", 
-        "src.cogs.challenges", 
-        "src.cogs.stats"
-        ]
+        # "src.cogs.verona",
+        "src.cogs.cpp",
+        "src.cogs.help",
+        "src.cogs.qt",
+        "src.cogs.rules",
+        "src.cogs.challenges",
+        "src.cogs.stats",
+        "src.cogs.rust"
+    ]
     for cog in bot.user_cogs:
         bot.load_extension(cog)
 

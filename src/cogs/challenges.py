@@ -1,8 +1,6 @@
 from discord.ext import commands
 import discord
 
-import datetime
-
 from typing import Union, Optional
 
 
@@ -63,4 +61,3 @@ class Challenges(commands.Cog):
 
 def setup(bot):
     bot.add_cog(Challenges(bot))
-

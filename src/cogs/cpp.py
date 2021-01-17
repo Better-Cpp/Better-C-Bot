@@ -1,8 +1,5 @@
 from discord.ext import commands
-import aiohttp
-import json
 import discord
-from lxml import etree
 
 import os
 import glob
@@ -64,10 +61,12 @@ class cpp(commands.Cog, name="C++"):
                 check_name = check_name[:5] + check_name[12:]
             f_name = check_name[6:].replace("\\", "::").replace(".html", "")
             if check_name.startswith(("src/cppref/cpp/language", "src/cppref/cpp/concept")):
-                special_pages.append(f'[`{f_name.replace("/", "::")}`]({result})')
+                special_pages.append(
+                    f'[`{f_name.replace("/", "::")}`]({result})')
                 continue
 
-            description.append(f'[`std::{f_name.replace("/", "::")}`]({result})')
+            description.append(
+                f'[`std::{f_name.replace("/", "::")}`]({result})')
 
         if len(special_pages) > 0:
             e.add_field(name='Language Results', value='\n'.join(
@@ -94,6 +93,7 @@ class cpp(commands.Cog, name="C++"):
             return await ctx.send("Failed to find lectures role")
         await ctx.author.add_roles(role)
         await ctx.send("Gave you the role!")
+
 
 def setup(bot):
     bot.add_cog(cpp(bot))
