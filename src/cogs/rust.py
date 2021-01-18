@@ -106,7 +106,7 @@ class Playground(commands.Cog):
                 (mode, code) = self.parse_args(ctx.kwargs["arg"])
 
                 warnings = False
-                if ctx.command.name == "eval":
+                if ctx.command.name == "rust":
                     comment_index = code.source.find("//")
                     end_idx = comment_index if comment_index != - \
                         1 else len(code.source)
