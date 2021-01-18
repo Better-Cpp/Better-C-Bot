@@ -92,7 +92,7 @@ class RulesEnforcer(commands.Cog, name="Rules"):
 
     @commands.command()
     async def lmgtfy(self, ctx, *, term):
-        await ctx.send(f"https://lmgtfy.com/?q={term.replace(' ', '+')}")
+        await ctx.send(f"https://letmegooglethat.com/?q={term.replace(' ', '+')}")
 
     @commands.command(hidden=True, name='eval')
     async def _eval(self, ctx, *, body: str):
