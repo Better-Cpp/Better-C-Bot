@@ -57,12 +57,12 @@ class cpp(commands.Cog, name="C++"):
                 f"[`std::{q}`](http://en.cppreference.com/w/cpp/{q})")
 
         for _, result in enumerate(results):
+            result = result.replace("src/cppref/", "")
             check_name = result.replace(
                 "http://en.cppreference.com/w/", "")
             check_name = check_name.replace("\\", "/")
             # print(check_name)
 
-            check_name = check_name.replace("src/cppref/cpp/", "")
             # print(check_name)
             f_name = check_name.replace("/", "::")
             f_name = f_name.replace(".html", "")
@@ -112,6 +112,7 @@ class cpp(commands.Cog, name="C++"):
                 f"[`{query}`](http://en.cppreference.com/w/c/{query})")
 
         for _, result in enumerate(results):
+            result = result.replace("src/cppref/", "")
             check_name = result.replace("http://en.cppreference.com/w/", "")
 
             check_name = check_name.replace(
@@ -119,7 +120,6 @@ class cpp(commands.Cog, name="C++"):
             # print(check_name)
 
             f_name = check_name.replace(".html", "")
-            f_name = f_name.replace("src/cppref/c/", "")
 
             if check_name.startswith(("language", "concept")) and not check_name.startswith("concepts"):
                 special_pages.append(
