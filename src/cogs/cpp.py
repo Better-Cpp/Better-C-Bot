@@ -87,7 +87,7 @@ class cpp(commands.Cog, name="C++"):
 
             desc_str = '\n'.join(description[:15])
             e.title = 'Search Results'
-            e.desc = desc_str
+            e.description = desc_str
 
             e.add_field(name='See More',
                         value=f'[`{discord.utils.escape_markdown(query)}` results]({url})')
@@ -141,7 +141,7 @@ class cpp(commands.Cog, name="C++"):
 
             desc_str = '\n'.join(description[:15])
             e.title = 'Search Results'
-            e.desc = desc_str
+            e.description = desc_str
 
             e.add_field(name='See More',
                         value=f'[`{discord.utils.escape_markdown(query)}` results]({url})')
