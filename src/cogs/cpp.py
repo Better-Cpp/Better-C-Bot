@@ -9,6 +9,7 @@ class cpp(commands.Cog, name="C++"):
 
     def __init__(self, bot):
         self.bot = bot
+        self.repeat_namespaces = ["experimental", "chrono", "filesystem"]
 
     def get_libs_list(self, language: str):
         with open(f"src/cppref/{language}libs.txt", "r") as libs:
@@ -57,7 +58,7 @@ class cpp(commands.Cog, name="C++"):
 
         e = discord.Embed()
         e.title = f"C++ Search Results for {query}"
-        e.colour = discord.Color.blurple  # Subject to change
+        e.colour = discord.Color.blurple()  # Subject to change
 
         lang_results = []
         lib_results = []
@@ -67,6 +68,10 @@ class cpp(commands.Cog, name="C++"):
                 f"[`({i[0]}) {'/'.join(i[1:])}`](http://en.cppreference.com/w/cpp/{'/'.join(i)})")
 
         for i in results["libs"]:
+            if i[0] in self.repeat_namespaces:
+                lib_results.append(
+                    f"[`({i[0]}) std::{'::'.join(i)}`](http://en.cppreference.com/w/cpp/{'/'.join(i)})")
+                continue
             lib_results.append(
                 f"[`({i[0]}) std::{'::'.join(i[1:])}`](http://en.cppreference.com/w/cpp/{'/'.join(i)})")
 
@@ -90,7 +95,7 @@ class cpp(commands.Cog, name="C++"):
 
         e = discord.Embed()
         e.title = f"C Search Results for {query}"
-        e.color = discord.Color.blurple  # Subject to change
+        e.color = discord.Color.blurple()  # Subject to change
 
         lang_results = []
         lib_results = []
