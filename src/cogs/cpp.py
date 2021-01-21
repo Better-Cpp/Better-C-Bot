@@ -116,12 +116,12 @@ class cpp(commands.Cog, name="C++"):
         lang_results = []
         lib_results = []
 
-        if not results["language"]:
+        if results["language"]:
             for i in results["language"]:
                 lang_results.append(
                     f"[`({i[0]}) {'/'.join(i[1:])}`](http://en.cppreference.com/w/c/{'/'.join(i)})")
 
-        if not results["language"]:
+        if results["language"]:
             for i in results["libs"]:
                 lib_results.append(
                     f"[`({'/'.join(i[:-1])}) {i[-1]}`](http://en.cppreference.com/w/c/{'/'.join(i)})")
