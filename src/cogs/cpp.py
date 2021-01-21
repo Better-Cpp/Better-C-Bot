@@ -1,9 +1,6 @@
 from discord.ext import commands
 import discord
 
-import os
-import glob
-
 
 class cpp(commands.Cog, name="C++"):
     """Commands made for C++
@@ -13,130 +10,110 @@ class cpp(commands.Cog, name="C++"):
     def __init__(self, bot):
         self.bot = bot
 
-    def get_directory_files(self, query, directory):
-        for file in glob.iglob(f"{directory}/*", recursive=True):
-            if not query.lower() in file.lower():
-                continue
-            yield f'http://en.cppreference.com/w/{file.replace("/src/cppref", "")}'
-            if not os.path.isdir(file):
-                continue
-            yield from self.get_directory_files(query, file)
+    def get_libs_list(self, language: str):
+        with open(f"src/cppref/{language}libs.txt", "r") as libs:
+            for item in libs:
+                if " " in item:
+                    # The [:-1] is to remove the '\n' written to the end of each line
+                    yield item[:-1].split(" ")
 
-    def get_corresponding_files(self, query: str, language: str):
-        if query.startswith("std::"):
-            query = query.replace("std::", "")
+    def get_language_list(self, language: str):
+        with open(f"src/cppref/{language}lang.txt", "r") as lang:
+            for item in lang:
+                if " " in item:
+                    yield item[:-1].split(" ")
 
-        query = query.replace("::", "/")
-        output = []
-        to_queue = list(self.get_directory_files(
-            query, f"src/cppref/{language}/**"))
-        for index, each in enumerate(to_queue):
-            if each.endswith(".html"):
-                continue
-            output.append(
-                to_queue.pop(index))
+    def find_results(self, language: str, query: str):
+        libs = self.get_libs_list(language)
+        lang = self.get_language_list(language)
 
-        output.extend(to_queue)
-        return output
+        res = {"language": [], "libs": []}
+
+        count = 0
+        for path in lang:
+            if count >= 10:
+                break
+            if query.lower() in path:
+                count += 1
+                res["language"].append(path)
+
+        count = 0
+        for path in libs:
+            if count >= 10:
+                break
+            if query.lower() in path:
+                count += 1
+                res["libs"].append(path)
+
+        return res
 
     @commands.command()
     async def cppref(self, ctx, *, query: str):
-        """Search for C++ items on cppreference"""
-        results = self.get_corresponding_files(query, "cpp")
+        """Search something on cppreference"""
 
-        url = f'http://en.cppreference.com/w/cpp/index.php?title=Special:Search?search={query}'
+        results = self.find_results("cpp", query)
+
+        url = f'https://en.cppreference.com/mwiki/index.php?title=Special%3ASearch&search={query}'
 
         e = discord.Embed()
+        e.title = f"C++ Search Results for {query}"
+        e.colour = discord.Color.blurple  # Subject to change
 
-        special_pages = []
-        description = []
-        q = query.replace('std::', '')
+        lang_results = []
+        lib_results = []
 
-        for _, result in enumerate(results):
-            result = result.replace("src/cppref/", "")
-            check_name = result.replace(
-                "http://en.cppreference.com/w/", "")
-            check_name = check_name.replace("\\", "/")
+        for i in results["language"]:
+            lang_results.append(
+                f"[`({i[0]}) {'/'.join(i[1:])}`](http://en.cppreference.com/w/cpp/{'/'.join(i)})")
 
-            f_name = check_name.replace("/", "::")
-            f_name = f_name.replace(".html", "")
+        for i in results["libs"]:
+            lib_results.append(
+                f"[`({i[0]}) std::{'::'.join(i[1:])}`](http://en.cppreference.com/w/cpp/{'/'.join(i)})")
 
-            if check_name.startswith(("language", "concept")) and not check_name.startswith("concepts"):
-                special_pages.append(
-                    f'[`{f_name.replace("cpp::", "")}`]({result})')
-                continue
+        e.add_field(inline=False, name="Language Results:",
+                    value="\n".join(lang_results))
+        e.add_field(inline=False, name="Library Results:",
+                    value="\n".join(lib_results))
 
-            description.append(
-                f'[`std::{f_name.replace("cpp::", "")}`]({result})')
-
-        if len(special_pages) > 0:
-            e.add_field(name='Language Results', value='\n'.join(
-                special_pages))
-            if len(description):
-                e.add_field(name='Library Results', value='\n'.join(
-                    description[:10]))
-        else:
-            if not len(description):
-                return await ctx.send('No results found.')
-
-            desc_str = '\n'.join(description[:15])
-            e.title = 'Search Results'
-            e.description = desc_str
-
-            e.add_field(name='See More',
-                        value=f'[`{discord.utils.escape_markdown(query)}` results]({url})')
+        e.add_field(name="Didn't find what you were looking for?",
+                    value=f'See more [`{query}` results]({url})', inline=False)
 
         await ctx.send(embed=e)
 
     @commands.command()
     async def cref(self, ctx, *, query: str):
-        """Search for C items on cppreference"""
-        results = self.get_corresponding_files(query, "c")
+        """Search something on cppreference"""
 
-        url = f'http://en.cppreference.com/w/c/index.php?title=Special:Search?search={query}'
+        results = self.find_results("c", query)
+
+        url = f'https://en.cppreference.com/mwiki/index.php?title=Special%3ASearch&search={query}'
 
         e = discord.Embed()
+        e.title = f"C Search Results for {query}"
+        e.color = discord.Color.blurple  # Subject to change
 
-        special_pages = []
-        description = []
+        lang_results = []
+        lib_results = []
 
-        for _, result in enumerate(results):
-            result = result.replace("src/cppref/", "")
-            check_name = result.replace("http://en.cppreference.com/w/", "")
+        for i in results["language"]:
+            lang_results.append(
+                f"[`({i[0]}) {'/'.join(i[1:])}`](http://en.cppreference.com/w/c/{'/'.join(i)})")
 
-            check_name = check_name.replace(
-                "\\", "/")
+        for i in results["libs"]:
+            lib_results.append(
+                f"[`({'/'.join(i[:-1])}) {i[-1]}`](http://en.cppreference.com/w/c/{'/'.join(i)})")
 
-            f_name = check_name.replace(".html", "")
+        e.add_field(inline=False, name="Language Results:",
+                    value="\n".join(lang_results))
+        e.add_field(inline=False, name="Library Results:",
+                    value="\n".join(lib_results))
 
-            if check_name.startswith(("language", "concept")) and not check_name.startswith("concepts"):
-                special_pages.append(
-                    f'[`{f_name.replace("c/", "")}`]({result})')
-                continue
-
-            description.append(
-                f'[`std::{f_name.replace("c/", "")}`]({result})')
-
-        if len(special_pages) > 0:
-            e.add_field(name='Language Results', value='\n'.join(
-                special_pages))
-            if len(description):
-                e.add_field(name='Library Results', value='\n'.join(
-                    description[:10]))
-        else:
-            if not len(description):
-                return await ctx.send('No results found.')
-
-            desc_str = '\n'.join(description[:15])
-            e.title = 'Search Results'
-            e.description = desc_str
-
-            e.add_field(name='See More',
-                        value=f'[`{discord.utils.escape_markdown(query)}` results]({url})')
+        e.add_field(name="Didn't find what you were looking for?",
+                    value=f'See more [`{query}` results]({url})', inline=False)
 
         await ctx.send(embed=e)
 
-    @commands.command()
+    @ commands.command()
     async def lectures(self, ctx):
         role = ctx.guild.get_role(695993548939722823)
         if role is None:
