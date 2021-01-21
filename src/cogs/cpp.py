@@ -59,10 +59,8 @@ class cpp(commands.Cog, name="C++"):
         results = self.find_results("cpp", query)
 
         e = discord.Embed()
-        e.title = f"Search Results for {query}"
+        e.title = f"C++ Search Results for {query}"
         e.colour = discord.Color.blurple()  # Subject to change
-        # IF this isn't here, it breaks when test is the query
-        e.add_field(inline=False, name="Language:", value="C++")
 
         if not results["language"] and not results["libs"]:
             return await ctx.send("No results found")
