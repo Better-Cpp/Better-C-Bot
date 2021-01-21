@@ -1,0 +1,660 @@
+concepts
+concepts Assignable
+concepts Boolean
+concepts Common
+concepts CommonReference
+concepts Constructible
+concepts ConvertibleTo
+concepts Copyable
+concepts CopyConstructible
+concepts DefaultConstructible
+concepts DerivedFrom
+concepts Destructible
+concepts EqualityComparable
+concepts Integral
+concepts Invocable
+concepts Movable
+concepts MoveConstructible
+concepts Predicate
+concepts Regular
+concepts Relation
+concepts Same
+concepts Semiregular
+concepts SignedIntegral
+concepts StrictTotallyOrdered
+concepts StrictWeakOrder
+concepts Swappable
+concepts UnsignedIntegral
+concepts
+header
+header algorithm
+header any
+header array
+header atomic
+header bit
+header bitset
+header cassert
+header ccomplex
+header cctype
+header cerrno
+header cfenv
+header cfloat
+header charconv
+header chrono
+header cinttypes
+header ciso646
+header climits
+header clocale
+header cmath
+header codecvt
+header compare
+header complex
+header concepts
+header condition_variable
+header contract
+header csetjmp
+header csignal
+header cstdalign
+header cstdarg
+header cstdbool
+header cstddef
+header cstdint
+header cstdio
+header cstdlib
+header cstring
+header ctgmath
+header ctime
+header cuchar
+header cwchar
+header cwctype
+header deque
+header exception
+header execution
+header experimental
+header experimental any
+header experimental filesystem
+header experimental memory_resource
+header experimental optional
+header experimental ranges
+header experimental ranges algorithm
+header experimental ranges concepts
+header experimental ranges functional
+header experimental ranges iterator
+header experimental ranges random
+header experimental ranges range
+header experimental ranges tuple
+header experimental ranges type_traits
+header experimental ranges utility
+header experimental string_view
+header filesystem
+header forward_list
+header fstream
+header functional
+header future
+header initializer_list
+header iomanip
+header ios
+header iosfwd
+header iostream
+header istream
+header iterator
+header limits
+header list
+header locale
+header map
+header memory
+header memory_resource
+header mutex
+header new
+header numeric
+header optional
+header ostream
+header queue
+header random
+header ranges
+header ratio
+header regex
+header scoped_allocator
+header set
+header shared_mutex
+header span
+header sstream
+header stack
+header stdexcept
+header streambuf
+header string
+header string_view
+header strstream
+header syncstream
+header system_error
+header thread
+header tuple
+header typeindex
+header typeinfo
+header type_traits
+header unordered_map
+header unordered_set
+header utility
+header valarray
+header variant
+header vector
+header version
+header
+keyword
+keyword alignas
+keyword alignof
+keyword and
+keyword and_eq
+keyword asm
+keyword audit
+keyword auto
+keyword axiom
+keyword bitand
+keyword bitor
+keyword bool
+keyword break
+keyword case
+keyword catch
+keyword char
+keyword char16_t
+keyword char32_t
+keyword char8_t
+keyword class
+keyword compl
+keyword concept
+keyword const
+keyword consteval
+keyword constexpr
+keyword const_cast
+keyword continue
+keyword co_await
+keyword co_return
+keyword co_yield
+keyword decltype
+keyword default
+keyword delete
+keyword do
+keyword double
+keyword dynamic_cast
+keyword else
+keyword enum
+keyword explicit
+keyword export
+keyword extern
+keyword false
+keyword final
+keyword float
+keyword for
+keyword friend
+keyword goto
+keyword if
+keyword inline
+keyword int
+keyword long
+keyword mutable
+keyword namespace
+keyword new
+keyword noexcept
+keyword not
+keyword not_eq
+keyword nullptr
+keyword operator
+keyword or
+keyword or_eq
+keyword override
+keyword private
+keyword protected
+keyword public
+keyword register
+keyword reinterpret_cast
+keyword requires
+keyword return
+keyword short
+keyword signed
+keyword sizeof
+keyword static
+keyword static_assert
+keyword static_cast
+keyword struct
+keyword switch
+keyword template
+keyword this
+keyword thread_local
+keyword throw
+keyword true
+keyword try
+keyword typedef
+keyword typeid
+keyword typename
+keyword union
+keyword unsigned
+keyword using
+keyword virtual
+keyword void
+keyword volatile
+keyword wchar_t
+keyword while
+keyword xor
+keyword xor_eq
+keyword
+keywords
+keywords if
+keywords static
+keywords
+language
+language abstract_class
+language access
+language acronyms
+language adl
+language aggregate_initialization
+language alignas
+language alignof
+language array
+language ascii
+language asm
+language as_if
+language as_operator
+language attributes
+language attributes carries_dependency
+language attributes contract
+language attributes deprecated
+language attributes fallthrough
+language attributes likely
+language attributes maybe_unused
+language attributes nodiscard
+language attributes noreturn
+language attributes no_unique_address
+language attributes optimize_for_synchronized
+language attributes
+language auto
+language basic_concepts
+language bit_field
+language bool_literal
+language break
+language cast_operator
+language character_literal
+language class
+language classes
+language class_template
+language class_template_argument_deduction
+language constant_expression
+language constant_initialization
+language consteval
+language constexpr
+language constraints
+language constructor
+language const_cast
+language continue
+language converting_constructor
+language copy_constructor
+language copy_elision
+language copy_initialization
+language coroutines
+language cv
+language data_members
+language declarations
+language decltype
+language deduction_guide
+language default_arguments
+language default_comparisons
+language default_constructor
+language default_initialization
+language definition
+language delete
+language dependent_name
+language derived_class
+language destructor
+language direct_initialization
+language do
+language dynamic_cast
+language ebo
+language elaborated_type_specifier
+language enum
+language escape
+language eval_order
+language exceptions
+language except_spec
+language explicit
+language explicit_cast
+language expressions
+language extending_std
+language final
+language floating_literal
+language fold
+language for
+language friend
+language function-try-block
+language function
+language functions
+language function_template
+language goto
+language history
+language identifiers
+language if
+language implicit_cast
+language incomplete_type
+language initialization
+language initializer_list
+language injected-class-name
+language inline
+language integer_literal
+language lambda
+language language_linkage
+language lifetime
+language list_initialization
+language lookup
+language main_function
+language member_functions
+language member_template
+language memory_model
+language modules
+language move_constructor
+language move_operator
+language name
+language namespace
+language namespace_alias
+language nested_classes
+language nested_types
+language new
+language noexcept
+language noexcept_spec
+language nullptr
+language object
+language objects
+language operators
+language operator_alternative
+language operator_arithmetic
+language operator_assignment
+language operator_comparison
+language operator_incdec
+language operator_logical
+language operator_member_access
+language operator_other
+language operator_precedence
+language overloaded_address
+language overload_resolution
+language override
+language parameter_pack
+language partial_specialization
+language pimpl
+language pointer
+language qualified_lookup
+language raii
+language range-for
+language reference
+language reference_initialization
+language reinterpret_cast
+language return
+language rule_of_three
+language scope
+language sfinae
+language sizeof...
+language sizeof
+language statements
+language static
+language static_assert
+language static_cast
+language storage_duration
+language string_literal
+language structured_binding
+language switch
+language templates
+language template_argument_deduction
+language template_parameters
+language template_specialization
+language this
+language throw
+language transactional_memory
+language translation_phases
+language try_catch
+language type-id
+language type
+language typedef
+language typeid
+language types
+language type_alias
+language ub
+language union
+language unqualified_lookup
+language user_literal
+language using_declaration
+language value_category
+language value_initialization
+language variable_template
+language variadic_arguments
+language virtual
+language while
+language zero_initialization
+language
+named_req
+named_req Allocator
+named_req AllocatorAwareContainer
+named_req AssociativeContainer
+named_req BasicLockable
+named_req BidirectionalIterator
+named_req BinaryPredicate
+named_req BinaryTypeTrait
+named_req BitmaskType
+named_req Callable
+named_req CharTraits
+named_req Clock
+named_req Compare
+named_req ConstexprIterator
+named_req Container
+named_req ContiguousContainer
+named_req ContiguousIterator
+named_req CopyAssignable
+named_req CopyConstructible
+named_req CopyInsertable
+named_req DefaultConstructible
+named_req DefaultInsertable
+named_req Destructible
+named_req EmplaceConstructible
+named_req EqualityComparable
+named_req Erasable
+named_req Eraseable
+named_req FormattedInputFunction
+named_req FormattedOutputFunction
+named_req ForwardIterator
+named_req FunctionObject
+named_req Hash
+named_req InputIterator
+named_req Iterator
+named_req LessThanComparable
+named_req LiteralType
+named_req Lockable
+named_req MoveAssignable
+named_req MoveConstructible
+named_req MoveInsertable
+named_req Mutex
+named_req NullablePointer
+named_req NumericType
+named_req OutputIterator
+named_req PODType
+named_req Predicate
+named_req RandomAccessIterator
+named_req RandomNumberDistribution
+named_req RandomNumberEngine
+named_req RandomNumberEngineAdaptor
+named_req RegexTraits
+named_req ReversibleContainer
+named_req SeedSequence
+named_req SequenceContainer
+named_req SharedMutex
+named_req SharedTimedMutex
+named_req StandardLayoutType
+named_req Swappable
+named_req TimedLockable
+named_req TimedMutex
+named_req TransformationTrait
+named_req TrivialClock
+named_req TriviallyCopyable
+named_req TrivialType
+named_req UnaryTypeTrait
+named_req UnformattedInputFunction
+named_req UnformattedOutputFunction
+named_req UniformRandomBitGenerator
+named_req UnorderedAssociativeContainer
+named_req ValueSwappable
+named_req
+preprocessor
+preprocessor conditional
+preprocessor error
+preprocessor impl
+preprocessor include
+preprocessor line
+preprocessor replace
+preprocessor
+types
+types add_cv
+types add_pointer
+types add_reference
+types aligned_storage
+types aligned_union
+types alignment_of
+types bad_cast
+types bad_cast bad_cast
+types bad_cast
+types bad_typeid
+types bad_typeid bad_typeid
+types bad_typeid
+types byte
+types climits
+types climits FLT_EVAL_METHOD
+types climits FLT_ROUNDS
+types climits
+types common_reference
+types common_type
+types conditional
+types conjunction
+types decay
+types disjunction
+types enable_if
+types endian
+types extent
+types has_unique_object_representations
+types has_virtual_destructor
+types integer
+types integral_constant
+types is_abstract
+types is_aggregate
+types is_arithmetic
+types is_array
+types is_assignable
+types is_base_of
+types is_bounded_array
+types is_class
+types is_compound
+types is_const
+types is_constant_evaluated
+types is_constructible
+types is_convertible
+types is_copy_assignable
+types is_copy_constructible
+types is_default_constructible
+types is_destructible
+types is_empty
+types is_enum
+types is_final
+types is_floating_point
+types is_function
+types is_fundamental
+types is_integral
+types is_invocable
+types is_literal_type
+types is_lvalue_reference
+types is_member_function_pointer
+types is_member_object_pointer
+types is_member_pointer
+types is_move_assignable
+types is_move_constructible
+types is_null_pointer
+types is_object
+types is_pod
+types is_pointer
+types is_polymorphic
+types is_reference
+types is_rvalue_reference
+types is_same
+types is_scalar
+types is_signed
+types is_standard_layout
+types is_swappable
+types is_trivial
+types is_trivially_copyable
+types is_unbounded_array
+types is_union
+types is_unsigned
+types is_void
+types is_volatile
+types make_signed
+types make_unsigned
+types max_align_t
+types negation
+types NULL
+types nullptr_t
+types numeric_limits
+types numeric_limits denorm_min
+types numeric_limits digits
+types numeric_limits digits10
+types numeric_limits epsilon
+types numeric_limits float_denorm_style
+types numeric_limits float_round_style
+types numeric_limits has_denorm
+types numeric_limits has_denorm_loss
+types numeric_limits has_infinity
+types numeric_limits has_quiet_NaN
+types numeric_limits has_signaling_NaN
+types numeric_limits infinity
+types numeric_limits is_bounded
+types numeric_limits is_exact
+types numeric_limits is_iec559
+types numeric_limits is_integer
+types numeric_limits is_modulo
+types numeric_limits is_signed
+types numeric_limits is_specialized
+types numeric_limits lowest
+types numeric_limits max
+types numeric_limits max_digits10
+types numeric_limits max_exponent
+types numeric_limits max_exponent10
+types numeric_limits min
+types numeric_limits min_exponent
+types numeric_limits min_exponent10
+types numeric_limits quiet_NaN
+types numeric_limits radix
+types numeric_limits round_error
+types numeric_limits round_style
+types numeric_limits signaling_NaN
+types numeric_limits tinyness_before
+types numeric_limits traps
+types numeric_limits
+types offsetof
+types ptrdiff_t
+types rank
+types remove_all_extents
+types remove_cv
+types remove_cvref
+types remove_extent
+types remove_pointer
+types remove_reference
+types result_of
+types size_t
+types type_identity
+types type_index
+types type_index hash
+types type_index hash_code
+types type_index name
+types type_index operator_cmp
+types type_index type_index
+types type_index
+types type_info
+types type_info before
+types type_info hash_code
+types type_info name
+types type_info operator_cmp
+types type_info ~type_info
+types type_info
+types underlying_type
+types void_t
+types
