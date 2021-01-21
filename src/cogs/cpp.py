@@ -100,7 +100,12 @@ class cpp(commands.Cog, name="C++"):
     async def cref(self, ctx, *, query: str):
         """Search something on cppreference"""
 
+        query = query.lower()
+
         results = self.find_results("c", query)
+
+        if not results["language"] and not results["libs"]:
+            return await ctx.send("No results found")
 
         url = f'https://en.cppreference.com/mwiki/index.php?title=Special%3ASearch&search={query}'
 
@@ -111,13 +116,15 @@ class cpp(commands.Cog, name="C++"):
         lang_results = []
         lib_results = []
 
-        for i in results["language"]:
-            lang_results.append(
-                f"[`({i[0]}) {'/'.join(i[1:])}`](http://en.cppreference.com/w/c/{'/'.join(i)})")
+        if not results["language"]:
+            for i in results["language"]:
+                lang_results.append(
+                    f"[`({i[0]}) {'/'.join(i[1:])}`](http://en.cppreference.com/w/c/{'/'.join(i)})")
 
-        for i in results["libs"]:
-            lib_results.append(
-                f"[`({'/'.join(i[:-1])}) {i[-1]}`](http://en.cppreference.com/w/c/{'/'.join(i)})")
+        if not results["language"]:
+            for i in results["libs"]:
+                lib_results.append(
+                    f"[`({'/'.join(i[:-1])}) {i[-1]}`](http://en.cppreference.com/w/c/{'/'.join(i)})")
 
         e.add_field(inline=False, name="Language Results:",
                     value="\n".join(lang_results))
