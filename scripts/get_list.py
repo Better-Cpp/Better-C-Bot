@@ -4,11 +4,14 @@ import glob
 
 def get_lists():
     specials = ["named_req", "language", "keyword", "header",
-                "concepts", "types", "preprocessor", "keywords", "experimental"]  # experimental is annoying to include
+                "concepts", "types", "preprocessor", "keywords"]
+    blacklist = ["experimental"]  # This is a pain
     with open("src/cppref/cpplibs.txt", "w+") as libs:
         dirs = glob.iglob("src/cppref/cpp/**", recursive=True)
         dirs = (a.replace("\\", "/").replace(".html", "") for a in dirs)
         for a in dirs:
+            if a in blacklist:
+                continue
             if not a.split("/")[3] in specials:
                 libs.write(a[15:].replace("/", " ") + '\n')
 
@@ -16,6 +19,8 @@ def get_lists():
         dirs = glob.iglob("src/cppref/cpp/**", recursive=True)
         dirs = (a.replace("\\", "/").replace(".html", "") for a in dirs)
         for a in dirs:
+            if a in blacklist:
+                continue
             if a.split("/")[3] in specials:
                 lang.write(a[15:].replace("/", " ") + '\n')
 
@@ -23,6 +28,8 @@ def get_lists():
         dirs = glob.iglob("src/cppref/c/**", recursive=True)
         dirs = (a.replace("\\", "/").replace(".html", "") for a in dirs)
         for a in dirs:
+            if a in blacklist:
+                continue
             if not a.split("/")[3] in specials:
                 libs.write(a[13:].replace("/", " ") + '\n')
 
@@ -35,6 +42,8 @@ def get_lists():
             dirs = glob.iglob("src/cppref/c/**", recursive=True)
             dirs = (a.replace("\\", "/").replace(".html", "") for a in dirs)
             for a in dirs:
+                if a in blacklist:
+                    continue
                 if a.split("/")[3] in specials:
                     lang.write(a[13:].replace("/", " ") + '\n')
 

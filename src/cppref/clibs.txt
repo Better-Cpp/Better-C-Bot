@@ -54,6 +54,15 @@ error ignore_handler_s
 error set_constraint_handler_s
 error static_assert
 error
+experimental
+experimental dynamic
+experimental dynamic getline
+experimental dynamic strdup
+experimental dynamic strndup
+experimental dynamic
+experimental fpext1
+experimental fpext4
+experimental
 index
 io
 io clearerr
