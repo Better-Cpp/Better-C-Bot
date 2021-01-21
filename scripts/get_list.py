@@ -35,8 +35,6 @@ def get_lists():
             dirs = glob.iglob("src/cppref/c/**", recursive=True)
             dirs = (a.replace("\\", "/").replace(".html", "") for a in dirs)
             for a in dirs:
-                if a in blacklist:
-                    continue
                 if a.split("/")[3] in specials:
                     lang.write(a[13:].replace("/", " ") + '\n')
 
