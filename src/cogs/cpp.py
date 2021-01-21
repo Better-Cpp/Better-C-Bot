@@ -72,17 +72,19 @@ class cpp(commands.Cog, name="C++"):
         lang_results = []
         lib_results = []
 
-        for i in results["language"]:
-            lang_results.append(
-                f"[`({i[0]}) {'/'.join(i[1:])}`](http://en.cppreference.com/w/cpp/{'/'.join(i)})")
+        if results["language"]:
+            for i in results["language"]:
+                lang_results.append(
+                    f"[`({i[0]}) {'/'.join(i[1:])}`](http://en.cppreference.com/w/cpp/{'/'.join(i)})")
 
-        for i in results["libs"]:
-            if i[0] in self.repeat_namespaces:
+        if results["libs"]:
+            for i in results["libs"]:
+                if i[0] in self.repeat_namespaces:
+                    lib_results.append(
+                        f"[`({i[0]}) std::{'::'.join(i)}`](http://en.cppreference.com/w/cpp/{'/'.join(i)})")
+                    continue
                 lib_results.append(
-                    f"[`({i[0]}) std::{'::'.join(i)}`](http://en.cppreference.com/w/cpp/{'/'.join(i)})")
-                continue
-            lib_results.append(
-                f"[`({i[0]}) std::{'::'.join(i[1:])}`](http://en.cppreference.com/w/cpp/{'/'.join(i)})")
+                    f"[`({i[0]}) std::{'::'.join(i[1:])}`](http://en.cppreference.com/w/cpp/{'/'.join(i)})")
 
         e.add_field(inline=False, name="Language Results:",
                     value="\n".join(lang_results))
