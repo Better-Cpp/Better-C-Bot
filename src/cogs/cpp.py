@@ -44,7 +44,7 @@ class cpp(commands.Cog, name="C++"):
             if count >= 10:
                 break
             for i in path:
-                if query.lower() in path:
+                if query.lower() in i:
                     count += 1
                     res["libs"].append(path)
 
