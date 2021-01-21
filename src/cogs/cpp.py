@@ -96,7 +96,7 @@ class cpp(commands.Cog, name="C++"):
 
         await ctx.send(embed=e)
 
-    @ commands.command()
+    @commands.command()
     async def cref(self, ctx, *, query: str):
         """Search something on cppreference"""
 
