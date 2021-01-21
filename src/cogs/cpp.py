@@ -34,17 +34,19 @@ class cpp(commands.Cog, name="C++"):
         for path in lang:
             if count >= 10:
                 break
-            if query.lower() in path:
-                count += 1
-                res["language"].append(path)
+            for i in path:
+                if query.lower() in i:
+                    count += 1
+                    res["language"].append(path)
 
         count = 0
         for path in libs:
             if count >= 10:
                 break
-            if query.lower() in path:
-                count += 1
-                res["libs"].append(path)
+            for i in path:
+                if query.lower() in path:
+                    count += 1
+                    res["libs"].append(path)
 
         return res
 
@@ -52,13 +54,20 @@ class cpp(commands.Cog, name="C++"):
     async def cppref(self, ctx, *, query: str):
         """Search something on cppreference"""
 
+        query = query.lower().replace("std::", "")
+
         results = self.find_results("cpp", query)
 
-        url = f'https://en.cppreference.com/mwiki/index.php?title=Special%3ASearch&search={query}'
-
         e = discord.Embed()
-        e.title = f"C++ Search Results for {query}"
+        e.title = f"Search Results for {query}"
         e.colour = discord.Color.blurple()  # Subject to change
+        # IF this isn't here, it breaks when test is the query
+        e.add_field(inline=False, name="Language:", value="C++")
+
+        if not results["language"] and not results["libs"]:
+            return await ctx.send("No results found")
+
+        url = f'https://en.cppreference.com/mwiki/index.php?title=Special%3ASearch&search={query}'
 
         lang_results = []
         lib_results = []
@@ -85,7 +94,7 @@ class cpp(commands.Cog, name="C++"):
 
         await ctx.send(embed=e)
 
-    @commands.command()
+    @ commands.command()
     async def cref(self, ctx, *, query: str):
         """Search something on cppreference"""
 
