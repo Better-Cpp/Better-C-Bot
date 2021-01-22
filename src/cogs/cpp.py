@@ -16,13 +16,13 @@ class cpp(commands.Cog, name="C++"):
             for item in libs:
                 if " " in item:
                     # The [:-1] is to remove the '\n' written to the end of each line
-                    yield item[:-1].split(" ")
+                    yield item[:-1]
 
     def get_language_list(self, language: str):
         with open(f"src/cppref/{language}lang.txt", "r") as lang:
             for item in lang:
                 if " " in item:
-                    yield item[:-1].split(" ")
+                    yield item[:-1]
 
     def find_results(self, language: str, query: str):
         libs = self.get_libs_list(language)
@@ -36,7 +36,7 @@ class cpp(commands.Cog, name="C++"):
                 break
             if query.lower() in path:
                 count += 1
-                res["language"].append(path)
+                res["language"].append(path.split(" "))
 
         count = 0
         for path in libs:
@@ -44,7 +44,7 @@ class cpp(commands.Cog, name="C++"):
                 break
             if query.lower() in path:
                 count += 1
-                res["libs"].append(path)
+                res["libs"].append(path.split(" "))
 
         return res
 
@@ -52,28 +52,35 @@ class cpp(commands.Cog, name="C++"):
     async def cppref(self, ctx, *, query: str):
         """Search something on cppreference"""
 
-        results = self.find_results("cpp", query)
+        query = query.lower().replace("std::", "")
 
-        url = f'https://en.cppreference.com/mwiki/index.php?title=Special%3ASearch&search={query}'
+        results = self.find_results("cpp", query)
 
         e = discord.Embed()
         e.title = f"C++ Search Results for {query}"
         e.colour = discord.Color.blurple()  # Subject to change
 
+        if not results["language"] and not results["libs"]:
+            return await ctx.send("No results found")
+
+        url = f'https://en.cppreference.com/mwiki/index.php?title=Special%3ASearch&search={query}'
+
         lang_results = []
         lib_results = []
 
-        for i in results["language"]:
-            lang_results.append(
-                f"[`({i[0]}) {'/'.join(i[1:])}`](http://en.cppreference.com/w/cpp/{'/'.join(i)})")
+        if results["language"]:
+            for i in results["language"]:
+                lang_results.append(
+                    f"[`({i[0]}) {'/'.join(i[1:])}`](http://en.cppreference.com/w/cpp/{'/'.join(i)})")
 
-        for i in results["libs"]:
-            if i[0] in self.repeat_namespaces:
+        if results["libs"]:
+            for i in results["libs"]:
+                if i[0] in self.repeat_namespaces:
+                    lib_results.append(
+                        f"[`({i[0]}) std::{'::'.join(i)}`](http://en.cppreference.com/w/cpp/{'/'.join(i)})")
+                    continue
                 lib_results.append(
-                    f"[`({i[0]}) std::{'::'.join(i)}`](http://en.cppreference.com/w/cpp/{'/'.join(i)})")
-                continue
-            lib_results.append(
-                f"[`({i[0]}) std::{'::'.join(i[1:])}`](http://en.cppreference.com/w/cpp/{'/'.join(i)})")
+                    f"[`({i[0]}) std::{'::'.join(i[1:])}`](http://en.cppreference.com/w/cpp/{'/'.join(i)})")
 
         e.add_field(inline=False, name="Language Results:",
                     value="\n".join(lang_results))
@@ -89,7 +96,12 @@ class cpp(commands.Cog, name="C++"):
     async def cref(self, ctx, *, query: str):
         """Search something on cppreference"""
 
+        query = query.lower()
+
         results = self.find_results("c", query)
+
+        if not results["language"] and not results["libs"]:
+            return await ctx.send("No results found")
 
         url = f'https://en.cppreference.com/mwiki/index.php?title=Special%3ASearch&search={query}'
 
@@ -100,13 +112,15 @@ class cpp(commands.Cog, name="C++"):
         lang_results = []
         lib_results = []
 
-        for i in results["language"]:
-            lang_results.append(
-                f"[`({i[0]}) {'/'.join(i[1:])}`](http://en.cppreference.com/w/c/{'/'.join(i)})")
+        if results["language"]:
+            for i in results["language"]:
+                lang_results.append(
+                    f"[`({i[0]}) {'/'.join(i[1:])}`](http://en.cppreference.com/w/c/{'/'.join(i)})")
 
-        for i in results["libs"]:
-            lib_results.append(
-                f"[`({'/'.join(i[:-1])}) {i[-1]}`](http://en.cppreference.com/w/c/{'/'.join(i)})")
+        if results["language"]:
+            for i in results["libs"]:
+                lib_results.append(
+                    f"[`({'/'.join(i[:-1])}) {i[-1]}`](http://en.cppreference.com/w/c/{'/'.join(i)})")
 
         e.add_field(inline=False, name="Language Results:",
                     value="\n".join(lang_results))
