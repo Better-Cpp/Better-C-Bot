@@ -16,13 +16,13 @@ class cpp(commands.Cog, name="C++"):
             for item in libs:
                 if " " in item:
                     # The [:-1] is to remove the '\n' written to the end of each line
-                    yield item[:-1].split(" ")
+                    yield item[:-1]
 
     def get_language_list(self, language: str):
         with open(f"src/cppref/{language}lang.txt", "r") as lang:
             for item in lang:
                 if " " in item:
-                    yield item[:-1].split(" ")
+                    yield item[:-1]
 
     def find_results(self, language: str, query: str):
         libs = self.get_libs_list(language)
@@ -34,19 +34,17 @@ class cpp(commands.Cog, name="C++"):
         for path in lang:
             if count >= 10:
                 break
-            for i in path:
-                if query.lower() in i:
-                    count += 1
-                    res["language"].append(path)
+            if query.lower() in path:
+                count += 1
+                res["language"].append(path.split(" "))
 
         count = 0
         for path in libs:
             if count >= 10:
                 break
-            for i in path:
-                if query.lower() in i:
-                    count += 1
-                    res["libs"].append(path)
+            if query.lower() in path:
+                count += 1
+                res["libs"].append(path.split(" "))
 
         return res
 
