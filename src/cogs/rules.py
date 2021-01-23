@@ -13,6 +13,9 @@ class RulesEnforcer(commands.Cog, name="Rules"):
         self.bot = bot
         self._last_result = None
 
+        # Maps channel : discord.Message
+        self._deleted = {}
+
     @commands.command()
     async def rule(self, ctx, number):
         """Display a rule"""
@@ -26,46 +29,23 @@ class RulesEnforcer(commands.Cog, name="Rules"):
 
         await ctx.send(f"**Rule {number}**:\n{j['rules'][number]}")
 
+    @commands.command()
+    async def snipe(self, ctx):
+        if ctx.channel not in self._deleted:
+            return await ctx.send("No message to snipe.")
+
+        message: discord.Message = self._deleted[ctx.channel]
+        user = str(message.author)
+        ts = message.created_at.isoformat(" ")
+        content = message.content
+        return await ctx.send(f"**{user}** said on {ts} UTC:\n{content}")
+
+    @commands.Cog.listener()
+    async def on_message_delete(self, message):
+        self._deleted[message.channel] = message
+
     def has_role(self, id, user):
         return any([id == each.id for each in user.roles])
-
-    @commands.command()
-    async def mute(self, ctx, mention: discord.Member):
-        if not self.has_role(583646707938623489, ctx.author):
-            return await ctx.send("Only staff may use this command")
-
-        role = discord.utils.get(ctx.guild.roles, name="muted")
-        if role is None:
-            role = await ctx.guild.create_role(name="muted")
-
-        await mention.add_roles(role)
-        await ctx.send(f"Muted {mention.mention}")
-
-    @commands.command()
-    async def setup(self, ctx, mention: discord.Member):
-        if not self.has_role(583646707938623489, ctx.author):
-            return await ctx.send("Only staff may use this command")
-
-        role = discord.utils.get(ctx.guild.roles, name="muted")
-        if role is None:
-            role = await ctx.guild.create_role(name="muted")
-
-        for channel in ctx.guild.channels:
-            await channel.set_permissions(role, send_messages=False)
-
-        await ctx.send("Server has been set up properly :)")
-
-    @commands.command()
-    async def unmute(self, ctx, mention: discord.Member):
-        if not self.has_role(583646707938623489, ctx.author):
-            return await ctx.send("Only staff may use this command")
-
-        role = discord.utils.get(ctx.guild.roles, name="muted")
-        if role is None:
-            role = await ctx.guild.create_role(name="muted")
-
-        await mention.remove_roles(role)
-        await ctx.send(f"Unmuted {mention.mention}")
 
     def cleanup_code(self, content):
         """Automatically removes code blocks from the code."""
