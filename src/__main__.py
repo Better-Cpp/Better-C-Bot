@@ -15,13 +15,13 @@ bot = commands.Bot(prefix, case_insensitive=True,
 async def on_ready():
     bot.user_cogs = [
         # "src.cogs.verona",
-        "cogs.cpp",
-        "cogs.help",
-        "cogs.qt",
-        "cogs.rules",
-        "cogs.challenges",
-        "cogs.stats",
-        "cogs.rust"
+        "src.cogs.cpp",
+        "src.cogs.help",
+        "src.cogs.qt",
+        "src.cogs.rules",
+        "src.cogs.challenges",
+        "src.cogs.stats",
+        "src.cogs.rust"
     ]
     for cog in bot.user_cogs:
         bot.load_extension(cog)
