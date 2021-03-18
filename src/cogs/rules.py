@@ -38,7 +38,7 @@ class RulesEnforcer(commands.Cog, name="Rules"):
         user = str(message.author)
         ts = message.created_at.isoformat(" ")
         content = message.content
-        return await ctx.send(f"**{user}** said on {ts} UTC:\n{content}")
+        return await ctx.send(f"**{discord.utils.escape_markdown(discord.utils.escape_mentions(user))}** said on {ts} UTC:\n{content}")
 
     @commands.Cog.listener()
     async def on_message_delete(self, message):
