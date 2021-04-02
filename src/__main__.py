@@ -4,7 +4,8 @@ from discord.ext import commands
 
 
 def prefix(bot, message):
-    return [".", "++"]
+    # return [".", "++"]
+    return ["??"]
 
 
 bot = commands.Bot(prefix, case_insensitive=True,
@@ -21,10 +22,13 @@ async def on_ready():
         "src.cogs.rules",
         "src.cogs.challenges",
         "src.cogs.stats",
-        "src.cogs.rust"
+        "src.cogs.rust",
+        "src.cogs.filter",
     ]
     for cog in bot.user_cogs:
+        print(f"Loading {cog}...")
         bot.load_extension(cog)
+        print(f"Loaded {cog}!")
 
     bot.http_client = aiohttp.ClientSession()
 
