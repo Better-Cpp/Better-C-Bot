@@ -4,8 +4,7 @@ from discord.ext import commands
 
 
 def prefix(bot, message):
-    # return [".", "++"]
-    return ["??"]
+    return [".", "++"]
 
 
 bot = commands.Bot(prefix, case_insensitive=True,
