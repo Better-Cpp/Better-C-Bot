@@ -57,6 +57,11 @@ class RulesEnforcer(commands.Cog, name="Rules"):
         # remove `foo`
         return content.strip('` \n')
 
+    @staticmethod
+    def get_permitted():
+        with open("src/backend/database.json", 'r') as file:
+            return json.load(file)["permitted"]
+
     async def _update_rules(self):
         with open("src/backend/database.json") as file:
             j = json.load(file)
@@ -70,31 +75,25 @@ class RulesEnforcer(commands.Cog, name="Rules"):
             matches = re.finditer(r"(\d+) - (.+?)(?=[\n ]+\d+? - |$)", content, flags=re.DOTALL)
 
             for rule in matches:
-                if rule[0] != "":
-                    number = rule[1]
-                    text = rule[2]
+                if rule[0] == "":
+                    continue
 
-                    if self._rules.get(number) is None:
-                        self._rules[number] = text
+                number = rule[1]
+                text = rule[2]
+
+                if self._rules.get(number) is None:
+                    self._rules[number] = text
 
     @commands.command()
     async def update_rules(self, ctx):
-        def get_permitted():
-            with open("src/backend/database.json", 'r') as file:
-                return json.load(file)["permitted"]
-
-        if ctx.message.author.id not in get_permitted():
+        if ctx.message.author.id not in self.get_permitted():
             return await ctx.send("You do not have authorization to use this command")
 
         await self._update_rules()
     
     @commands.command()
     async def reload(self, ctx):
-        def get_permitted():
-            with open("src/backend/database.json", 'r') as file:
-                return json.load(file)["permitted"]
-
-        if ctx.message.author.id not in get_permitted():
+        if ctx.message.author.id not in self.get_permitted():
             return await ctx.send("You do not have authorization to use this command")
 
         for cog in self.bot.user_cogs:
@@ -109,12 +108,7 @@ class RulesEnforcer(commands.Cog, name="Rules"):
     @commands.command(hidden=True, name='eval')
     async def _eval(self, ctx, *, body: str):
         """Evaluates code"""
-
-        def get_permitted():
-            with open("src/backend/database.json", 'r') as file:
-                return json.load(file)["permitted"]
-
-        if ctx.message.author.id not in get_permitted():
+        if ctx.message.author.id not in self.get_permitted():
             return await ctx.send("You do not have authorization to use this command")
 
         env = {
