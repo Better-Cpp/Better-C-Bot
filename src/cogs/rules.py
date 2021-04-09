@@ -18,7 +18,7 @@ class RulesEnforcer(commands.Cog, name="Rules"):
         self._deleted = {}
 
         # Stores parsed rules as number : text
-        self._rules = {}
+        # self._rules = {}
         
         bot.loop.create_task(self._update_rules())
 
@@ -63,6 +63,7 @@ class RulesEnforcer(commands.Cog, name="Rules"):
         
         channel = self.bot.get_channel(j["rules_channel"])
         messages = await channel.history(limit=1000000, oldest_first=True).flatten()
+        self._rules = {}
 
         for message in messages:
             content = message.clean_content
@@ -85,7 +86,7 @@ class RulesEnforcer(commands.Cog, name="Rules"):
         if ctx.message.author.id not in get_permitted():
             return await ctx.send("You do not have authorization to use this command")
 
-        self._update_rules()
+        await self._update_rules()
     
     @commands.command()
     async def reload(self, ctx):
