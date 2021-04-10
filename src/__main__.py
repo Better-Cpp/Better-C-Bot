@@ -23,6 +23,8 @@ async def on_ready():
         "src.cogs.stats",
         "src.cogs.rust",
         "src.cogs.filter",
+        "src.cogs.general",
+        "src.cogs.admin",
     ]
     for cog in bot.user_cogs:
         print(f"Loading {cog}...")

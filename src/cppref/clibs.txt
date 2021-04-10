@@ -1,9 +1,13 @@
 
 algorithm
+algorithm
 algorithm bsearch
 algorithm qsort
-algorithm
 atomic
+atomic
+atomic ATOMIC_FLAG_INIT
+atomic ATOMIC_LOCK_FREE_consts
+atomic ATOMIC_VAR_INIT
 atomic atomic_compare_exchange
 atomic atomic_exchange
 atomic atomic_fetch_add
@@ -13,23 +17,20 @@ atomic atomic_fetch_sub
 atomic atomic_fetch_xor
 atomic atomic_flag
 atomic atomic_flag_clear
-atomic ATOMIC_FLAG_INIT
 atomic atomic_flag_test_and_set
 atomic atomic_init
 atomic atomic_is_lock_free
 atomic atomic_load
-atomic ATOMIC_LOCK_FREE_consts
 atomic atomic_signal_fence
 atomic atomic_store
 atomic atomic_thread_fence
-atomic ATOMIC_VAR_INIT
 atomic kill_dependency
 atomic memory_order
-atomic
 chrono
+chrono
+chrono CLOCKS_PER_SEC
 chrono asctime
 chrono clock
-chrono CLOCKS_PER_SEC
 chrono clock_t
 chrono ctime
 chrono difftime
@@ -38,13 +39,13 @@ chrono localtime
 chrono mktime
 chrono strftime
 chrono time
+chrono time_t
 chrono timespec
 chrono timespec_get
-chrono time_t
 chrono tm
 chrono wcsftime
-chrono
 comment
+error
 error
 error abort_handler_s
 error assert
@@ -53,17 +54,17 @@ error errno_macros
 error ignore_handler_s
 error set_constraint_handler_s
 error static_assert
-error
 experimental
+experimental
+experimental dynamic
 experimental dynamic
 experimental dynamic getline
 experimental dynamic strdup
 experimental dynamic strndup
-experimental dynamic
 experimental fpext1
 experimental fpext4
-experimental
 index
+io
 io
 io clearerr
 io fclose
@@ -111,25 +112,30 @@ io vfprintf
 io vfscanf
 io vfwprintf
 io vfwscanf
-io
+links
 links
 links libs
-links
 locale
-locale lconv
+locale
 locale LC_categories
+locale lconv
 locale localeconv
 locale setlocale
-locale
+memory
 memory
 memory aligned_alloc
 memory calloc
 memory free
 memory malloc
 memory realloc
-memory
+numeric
 numeric
 numeric complex
+numeric complex
+numeric complex CMPLX
+numeric complex Complex_I
+numeric complex I
+numeric complex Imaginary_I
 numeric complex cabs
 numeric complex cacos
 numeric complex cacosh
@@ -143,9 +149,7 @@ numeric complex ccosh
 numeric complex cexp
 numeric complex cimag
 numeric complex clog
-numeric complex CMPLX
 numeric complex complex
-numeric complex Complex_I
 numeric complex conj
 numeric complex cpow
 numeric complex cproj
@@ -155,11 +159,12 @@ numeric complex csinh
 numeric complex csqrt
 numeric complex ctan
 numeric complex ctanh
-numeric complex I
 numeric complex imaginary
-numeric complex Imaginary_I
-numeric complex
 numeric fenv
+numeric fenv
+numeric fenv FE_DFL_ENV
+numeric fenv FE_exceptions
+numeric fenv FE_round
 numeric fenv feclearexcept
 numeric fenv feenv
 numeric fenv feexceptflag
@@ -168,11 +173,11 @@ numeric fenv feraiseexcept
 numeric fenv feround
 numeric fenv fetestexcept
 numeric fenv feupdateenv
-numeric fenv FE_DFL_ENV
-numeric fenv FE_exceptions
-numeric fenv FE_round
-numeric fenv
 numeric math
+numeric math
+numeric math FP_categories
+numeric math HUGE_VAL
+numeric math INFINITY
 numeric math abs
 numeric math acos
 numeric math acosh
@@ -201,12 +206,9 @@ numeric math fmax
 numeric math fmin
 numeric math fmod
 numeric math fpclassify
-numeric math FP_categories
 numeric math frexp
-numeric math HUGE_VAL
 numeric math hypot
 numeric math ilogb
-numeric math INFINITY
 numeric math isfinite
 numeric math isgreater
 numeric math isgreaterequal
@@ -244,35 +246,35 @@ numeric math tan
 numeric math tanh
 numeric math tgamma
 numeric math trunc
-numeric math
 numeric random
-numeric random rand
+numeric random
 numeric random RAND_MAX
+numeric random rand
 numeric random srand
-numeric random
 numeric tgmath
-numeric
 program
-program abort
-program atexit
-program at_quick_exit
-program exit
+program
 program EXIT_status
+program SIG_ERR
+program SIG_strategies
+program SIG_types
+program _Exit
+program abort
+program at_quick_exit
+program atexit
+program exit
 program getenv
 program jmp_buf
 program longjmp
 program quick_exit
 program raise
 program setjmp
-program signal
 program sig_atomic_t
-program SIG_ERR
-program SIG_strategies
-program SIG_types
+program signal
 program system
-program _Exit
-program
 string
+string
+string byte
 string byte
 string byte atof
 string byte atoi
@@ -316,7 +318,7 @@ string byte strtoul
 string byte strxfrm
 string byte tolower
 string byte toupper
-string byte
+string multibyte
 string multibyte
 string multibyte btowc
 string multibyte c16rtomb
@@ -338,7 +340,7 @@ string multibyte wcsrtombs
 string multibyte wcstombs
 string multibyte wctob
 string multibyte wctomb
-string multibyte
+string wide
 string wide
 string wide iswalnum
 string wide iswalpha
@@ -383,9 +385,10 @@ string wide wmemcmp
 string wide wmemcpy
 string wide wmemmove
 string wide wmemset
-string wide
-string
 thread
+thread
+thread ONCE_FLAG_INIT
+thread TSS_DTOR_ITERATIONS
 thread call_once
 thread cnd_broadcast
 thread cnd_destroy
@@ -400,7 +403,6 @@ thread mtx_timedlock
 thread mtx_trylock
 thread mtx_types
 thread mtx_unlock
-thread ONCE_FLAG_INIT
 thread thrd_create
 thread thrd_current
 thread thrd_detach
@@ -413,14 +415,12 @@ thread thrd_yield
 thread thread_local
 thread tss_create
 thread tss_delete
-thread TSS_DTOR_ITERATIONS
 thread tss_get
 thread tss_set
-thread
+variadic
 variadic
 variadic va_arg
 variadic va_copy
 variadic va_end
 variadic va_list
 variadic va_start
-variadic
