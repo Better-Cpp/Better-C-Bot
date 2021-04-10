@@ -60,7 +60,7 @@ class RulesEnforcer(commands.Cog, name="Rules"):
                 if self._rules.get(number) is None:
                     self._rules[number] = text
 
-    @commands.command()
+    @commands.command(hidden=True)
     async def update_rules(self, ctx):
         if ctx.message.author.id not in self.file["permitted"]:
             return await ctx.send("You do not have authorization to use this command")

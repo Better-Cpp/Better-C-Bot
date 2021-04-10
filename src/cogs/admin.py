@@ -8,7 +8,7 @@ from discord.ext import commands
 import discord
 
 
-class Administration(commands.Cog, name="Rules"):
+class Administration(commands.Cog, name="Administration"):
     def __init__(self, bot):
         self.bot = bot
         self._last_result = None
@@ -25,7 +25,7 @@ class Administration(commands.Cog, name="Rules"):
         # remove `foo`
         return content.strip('` \n')
 
-    @commands.command()
+    @commands.command(hidden=True)
     async def reload(self, ctx):
         if ctx.message.author.id not in self.file["permitted"]:
             return await ctx.send("You do not have authorization to use this command")
@@ -35,8 +35,8 @@ class Administration(commands.Cog, name="Rules"):
 
         await ctx.send("Updated cogs:\n```\n{}\n```".format('\n'.join(self.bot.user_cogs)))
 
-    @commands.command(hidden=True, name='eval')
-    async def _eval(self, ctx, *, body: str):
+    @commands.command(hidden=True)
+    async def eval(self, ctx, *, body: str):
         """Evaluates code"""
         if ctx.message.author.id not in self.file["permitted"]:
             return await ctx.send("You do not have authorization to use this command")
