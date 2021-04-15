@@ -26,7 +26,7 @@ class RulesEnforcer(commands.Cog, name="Rules"):
     async def rule(self, ctx, number):
         """Display a rule"""
         if self._rules.get(number) is None:
-            return await ctx.send(f"Invalid rule number: `{number}`")
+            return await ctx.send(f"Invalid rule number: `{discord.utils.escape_mentions(number)}`")
         else:
             await ctx.send(f"**Rule {number}**:\n{self._rules[number]}")
 
