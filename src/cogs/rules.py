@@ -1,21 +1,30 @@
 import io
 import json
 import re
+import time
 
+from collections import deque
 from discord.ext import commands
 import discord
 
 
 class RulesEnforcer(commands.Cog, name="Rules"):
+    with open("src/backend/database.json", 'r') as f:
+        file = json.load(f)
+
     def __init__(self, bot):
         self.bot = bot
 
         # Maps channel : discord.Message
         self._deleted = {}
-        
-        with open("src/backend/database.json", 'r') as file:
-            self.file = json.load(file)
 
+        self._recent_joins = deque()
+
+        self.massjoin_detect = True
+
+        with open("src/backend/database.json", 'r') as f: # Seems to be unavoidable
+            self.file = json.load(f)
+        
         bot.loop.create_task(self._update_rules())
 
     @commands.command()
@@ -36,6 +45,40 @@ class RulesEnforcer(commands.Cog, name="Rules"):
         ts = message.created_at.isoformat(" ")
         content = message.content
         return await ctx.send(f"**{discord.utils.escape_markdown(discord.utils.escape_mentions(user))}** said on {ts} UTC:\n{content}")
+
+    @commands.Cog.listener()
+    async def on_member_join(self, member):
+        self._recent_joins.append([member, time.time()])
+        recent_joins = self._recent_joins.copy()
+
+        for join in self._recent_joins:
+            secs_since_join = time.time() - join[1]
+            if secs_since_join >= self.file["massjoin_window"]:
+                recent_joins.popleft()
+
+        self._recent_joins = recent_joins.copy()
+        join_amount = len(self._recent_joins)
+
+        if join_amount >= self.file["massjoin_amount"] and self.massjoin_detect == True:
+            for member in member.guild.get_role(self.file["staff_role"]).members:
+                    count = 0
+
+                    if member.status == discord.Status.online and count < 2:
+                        dm_channel = member.dm_channel
+                        if dm_channel == None:
+                            dm_channel = await member.create_dm()
+
+                        await dm_channel.send("Mass member join detected!")
+                        count = count+1
+                
+    @commands.command()
+    @commands.has_role(file["staff_role"])
+    async def toggle_massjoin_detection(self, ctx):
+        self.massjoin_detect = not self.massjoin_detect
+        if self.massjoin_detect:
+            await ctx.send("Massjoin detection is now on")
+        else:
+            await ctx.send("Massjoin detection is now off")
 
     @commands.Cog.listener()
     async def on_message_delete(self, message):
@@ -61,12 +104,11 @@ class RulesEnforcer(commands.Cog, name="Rules"):
                     self._rules[number] = text
 
     @commands.command(hidden=True)
+    @commands.has_role(file["staff_role"])
     async def update_rules(self, ctx):
-        if ctx.message.author.id not in self.file["permitted"]:
-            return await ctx.send("You do not have authorization to use this command")
-
         await self._update_rules()
         await ctx.send("The rules were updated successully")
     
 def setup(bot):
     bot.add_cog(RulesEnforcer(bot))
+
