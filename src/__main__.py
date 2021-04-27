@@ -25,6 +25,7 @@ async def on_ready():
         "src.cogs.filter",
         "src.cogs.general",
         "src.cogs.admin",
+        "src.cogs.error_handler"
     ]
     for cog in bot.user_cogs:
         print(f"Loading {cog}...")
