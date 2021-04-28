@@ -15,9 +15,8 @@ class CommandErrorHandler(commands.Cog, name="Error handler"):
             return
 
         cog = ctx.cog
-        if cog:
-            if cog._get_overridden_method(cog.cog_command_error) is not None:
-                return
+        if cog and cog._get_overridden_method(cog.cog_command_error) is not None:
+            return
 
         ignored = (commands.CommandNotFound, )
         error = getattr(error, 'original', error)
