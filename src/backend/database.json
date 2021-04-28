@@ -1,7 +1,8 @@
 {
     "rules_channel": 583301260006916099,
     "massjoin_window": 30,
-    "massjoin_amount": 2,
+    "massjoin_amount": 5,
+    "massjoin_notif_timeout": 300,
     "permitted": [
         553478921870508061
     ],

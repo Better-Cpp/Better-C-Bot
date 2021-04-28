@@ -3,7 +3,6 @@ import json
 import re
 import time
 
-from collections import deque
 from discord.ext import commands
 import discord
 
@@ -18,9 +17,11 @@ class RulesEnforcer(commands.Cog, name="Rules"):
         # Maps channel : discord.Message
         self._deleted = {}
 
-        self._recent_joins = deque()
+        self._recent_joins = []
 
         self.massjoin_detect = True
+
+        self.next_massjoin_notif = time.time()
 
         with open("src/backend/database.json", 'r') as f: # Seems to be unavoidable
             self.file = json.load(f)
@@ -46,30 +47,47 @@ class RulesEnforcer(commands.Cog, name="Rules"):
         content = message.content
         return await ctx.send(f"**{discord.utils.escape_markdown(discord.utils.escape_mentions(user))}** said on {ts} UTC:\n{content}")
 
+    async def _get_dm_channel(self, member):
+        dm_channel = member.dm_channel
+        if dm_channel == None:
+            dm_channel = await member.create_dm()
+        return dm_channel
+
+    async def _notify_staff(self, guild, max_amount, message):
+        staff_role = guild.get_role(self.file["staff_role"]);
+        selected_staff = [
+            x for x in staff_role.members
+            if x.status == discord.Status.online
+        ][:max_amount]
+
+        if len(selected_staff) < max_amount:
+            selected_staff = staff_role.members
+
+
+        for staff_member in selected_staff:
+            dm_channel = await self._get_dm_channel(staff_member)
+            await dm_channel.send(message)
+
+        self.next_massjoin_notif = time.time() + self.file["massjoin_notif_timeout"]
+        
+              
     @commands.Cog.listener()
     async def on_member_join(self, member):
-        self._recent_joins.append([member, time.time()])
-        recent_joins = self._recent_joins.copy()
+        if not self.massjoin_detect: return
 
-        for join in self._recent_joins:
-            secs_since_join = time.time() - join[1]
-            if secs_since_join >= self.file["massjoin_window"]:
-                recent_joins.popleft()
+        current_time = time.time()
 
-        self._recent_joins = recent_joins.copy()
+        self._recent_joins = [
+            join_time for join_time in self._recent_joins
+            if current_time - join_time <= self.file["massjoin_window"]
+        ]
+
+        self._recent_joins.append(current_time)
+
         join_amount = len(self._recent_joins)
 
-        if join_amount >= self.file["massjoin_amount"] and self.massjoin_detect == True:
-            for member in member.guild.get_role(self.file["staff_role"]).members:
-                    count = 0
-
-                    if member.status == discord.Status.online and count < 2:
-                        dm_channel = member.dm_channel
-                        if dm_channel == None:
-                            dm_channel = await member.create_dm()
-
-                        await dm_channel.send("Mass member join detected!")
-                        count = count+1
+        if join_amount >= self.file["massjoin_amount"] and self.next_massjoin_notif <= current_time:
+            await self._notify_staff(member.guild, 2, "Mass member join detected!")
                 
     @commands.command()
     @commands.has_role(file["staff_role"])
