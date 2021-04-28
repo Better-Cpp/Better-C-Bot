@@ -25,7 +25,6 @@ class RulesEnforcer(commands.Cog, name="Rules"):
 
         with open("src/backend/database.json", 'r') as f: # Seems to be unavoidable
             self.file = json.load(f)
-        
         bot.loop.create_task(self._update_rules())
 
     @commands.command()
@@ -47,48 +46,33 @@ class RulesEnforcer(commands.Cog, name="Rules"):
         content = message.content
         return await ctx.send(f"**{discord.utils.escape_markdown(discord.utils.escape_mentions(user))}** said on {ts} UTC:\n{content}")
 
-    async def _get_dm_channel(self, member):
-        dm_channel = member.dm_channel
-        if dm_channel == None:
-            dm_channel = await member.create_dm()
-        return dm_channel
+    async def _notify_staff(self, guild, message):
+        role = self.file["staff_role"]
+        channel = guild.system_channel
+        if channel:
+            await channel.send(f"<@&{role}> {message}.")
 
-    async def _notify_staff(self, guild, max_amount, message):
-        staff_role = guild.get_role(self.file["staff_role"]);
-        selected_staff = [
-            x for x in staff_role.members
-            if x.status == discord.Status.online
-        ][:max_amount]
-
-        if len(selected_staff) < max_amount:
-            selected_staff = staff_role.members
-
-
-        for staff_member in selected_staff:
-            dm_channel = await self._get_dm_channel(staff_member)
-            await dm_channel.send(message)
-
-        self.next_massjoin_notif = time.time() + self.file["massjoin_notif_timeout"]
-        
-              
     @commands.Cog.listener()
     async def on_member_join(self, member):
-        if not self.massjoin_detect: return
+        if not self.massjoin_detect:
+            return
 
         current_time = time.time()
 
         self._recent_joins = [
-            join_time for join_time in self._recent_joins
-            if current_time - join_time <= self.file["massjoin_window"]
+            x for x in self._recent_joins
+            if current_time - x["join_time"] <= self.file["massjoin_window"]
         ]
 
-        self._recent_joins.append(current_time)
+        self._recent_joins.append({"join_time": current_time, "id": member.id})
 
         join_amount = len(self._recent_joins)
 
         if join_amount >= self.file["massjoin_amount"] and self.next_massjoin_notif <= current_time:
-            await self._notify_staff(member.guild, 2, "Mass member join detected!")
-                
+            first_joined_id = self._recent_joins[0]["id"]
+            await self._notify_staff(member.guild, "Mass member join detected. " + f"First join ID: `{first_joined_id}`")
+            self.next_massjoin_notif = current_time + self.file["massjoin_notif_timeout"]
+
     @commands.command()
     @commands.has_role(file["staff_role"])
     async def toggle_massjoin_detection(self, ctx):
@@ -126,7 +110,6 @@ class RulesEnforcer(commands.Cog, name="Rules"):
     async def update_rules(self, ctx):
         await self._update_rules()
         await ctx.send("The rules were updated successully")
-    
 def setup(bot):
     bot.add_cog(RulesEnforcer(bot))
 
