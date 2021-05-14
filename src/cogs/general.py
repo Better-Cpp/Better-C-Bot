@@ -1,4 +1,5 @@
 import io
+import urllib.parse
 # import json
 
 from discord.ext import commands
@@ -14,7 +15,7 @@ class General(commands.Cog, name="General"):
 
     @commands.command()
     async def lmgtfy(self, ctx, *, term):
-        await ctx.send(f"https://letmegooglethat.com/?q={term.replace(' ', '+')}")
+        await ctx.send(f"https://letmegooglethat.com/?q={urllib.parse.quote(term)}")
 
 def setup(bot):
     bot.add_cog(General(bot))
