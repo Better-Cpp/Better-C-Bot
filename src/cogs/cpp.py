@@ -1,7 +1,10 @@
 from discord.ext import commands
 import urllib.parse as parse
 import discord
+import subprocess
+import re
 
+codeblock_regex = re.compile(r"```(c|cpp|cxx|cc)\n([\s\S]+?)```", re.I | re.M)
 
 class cpp(commands.Cog, name="C++"):
     """Commands made for C++
@@ -131,6 +134,38 @@ class cpp(commands.Cog, name="C++"):
             return await ctx.send("Failed to find lectures role")
         await ctx.author.add_roles(role)
         await ctx.send("Gave you the role!")
+    @commands.command()
+    async def format(self, ctx, style = None):
+        """Format C or C++ code in the message you are replying to. Usage: !format [style]"""
+        target_msg = ctx.message.reference and ctx.message.reference.resolved
+        if target_msg == None:
+            await ctx.send("You must reply to an existing message with this command in order to format it.");
+            return
+
+        valid_styles = ["llvm", "gnu", "google", "chromium", "microsoft", "mozilla", "webkit"]
+
+        command = ["/usr/bin/clang-format"]
+        if style in valid_styles:
+            command.extend(["--style", style]);
+
+        result = None
+        matches = list(codeblock_regex.finditer(target_msg.content))
+        if len(matches) != 0:
+            result = target_msg.content
+            for match in reversed(matches):
+                start = match.start(2)
+                end = match.end(2)
+                result = result[:start] + subprocess.run(command, input=result[start:end], capture_output=True, text=True).stdout + result[end:]
+        else:
+            result = f"```cpp\n{subprocess.run(command, input=target_msg.content, capture_output=True, text=True).stdout}```"
+
+        name_target_author = None
+        if target_msg.author != ctx.author:
+            name_target_author = f"{target_msg.author.to_string()}'s" # If it's a differnt person say their username followed by 's, e.g. Lenny#1234's
+        else:
+            name_target_author = "Your" # otherwise, just say Your
+        
+        await ctx.send(name_target_author + " formatted code:\n" + result, reference=ctx.message)
 
 
 def setup(bot):
