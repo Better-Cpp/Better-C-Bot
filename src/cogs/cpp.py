@@ -5,6 +5,7 @@ import subprocess
 import re
 import io
 import datetime
+import contextlib
 
 _code_block_regex = re.compile(r"\s?```(c|cpp|cxx|cc)?\n([\s\S]+?)```\s?", re.I | re.M)
 _inline_code_regex = re.compile(r"(?<!`)(``?)(?!`)(.+?)(?<!`)\1(?!`)", re.M)
@@ -18,30 +19,20 @@ def _clang_format(code, style: str = None):
 
     return subprocess.run(command, input=code, capture_output=True, text=True).stdout
 
-def _create_format_body(non_code_list, code_list):
-    result = ""
-    for non_code, code in zip(non_code_list, code_list):
-        result += non_code
-        result += f"```c\n{code}```"
-    result += non_code_list[-1]
+def _create_format_body(sections):
+    sections = sections.copy()
+    sections[1::2] = [f"```c\n{code}```" for code in sections[1::2]]
+    return "".join(sections)
 
-    return result
-
-def _create_alt_format_body(non_code_list, code_list):
-    result = ""
-
+def _create_alt_format_body(sections):
     # if there's no non-code, just return empty string
     # because there's no point in signifying where the
     # code blocks were if the original text was solely code blocks
-    if len("".join(non_code_list).strip()) == 0:
-        return result
-
-    for i, (non_code, _) in enumerate(zip(non_code_list, code_list)):
-        result += non_code
-        result += f"\n[Block #{i + 1}]\n"
-    result += non_code_list[-1]
-
-    return result
+    if len("".join(sections[::2]).strip()) == 0:
+        return ""
+    sections = sections.copy()
+    sections[1::2] = [f"\n[Block #{i + 1}]\n" for i in range(len(sections[1::2]))]
+    return "".join(sections)
 
 class cpp(commands.Cog, name="C++"):
     """Commands made for C++
@@ -197,10 +188,7 @@ class cpp(commands.Cog, name="C++"):
 
         code_block_matches = list(_code_block_regex.finditer(processed))
 
-        # list of non-code sections of the original message
-        non_code_list = []
-        # list of code sections of the original message
-        code_list = []
+        sections = []
 
         if len(code_block_matches) != 0:
             last_end = 0
@@ -211,41 +199,35 @@ class cpp(commands.Cog, name="C++"):
                 end_inner = match.end(2)
 
                 formatted_code = _clang_format(processed[start_inner:end_inner], style)
-                non_code_list.append(processed[last_end:match.start()])
-                code_list.append(formatted_code)
+                sections.append(processed[last_end:match.start()])
+                sections.append(formatted_code)
                 last_end = match.end()
-
-            non_code_list.append(processed[last_end:])
+            sections.append(processed[last_end:])
         else:
             formatted_code = _clang_format(target_msg.content, style)
-            non_code_list = ["", ""]
-            code_list = [formatted_code]
+            sections = ['', formatted_code, '']
 
         if ctx.message.author != target_msg.author:
             name_target_author = f"{target_msg.author}'s"
         else:
             name_target_author = "Your"
 
-        result = f"{name_target_author} formatted code:\n{_create_format_body(non_code_list, code_list)}"
+        result = f"{name_target_author} formatted code:\n{_create_format_body(sections)}"
 
         try:
             if len(result) <= 2000:
                 await ctx.reply(result)
             else:
-                if len(code_list) <= 10:
-                    io_files = [io.StringIO(x) for x in code_list]
-                    discord_files = [discord.File(f, f"block_{i + 1}.cpp") for i, f in enumerate(io_files)]
-                else:
-                    file_contents = "".join([f"/* [Block #{i + 1}] */\n{code}\n" for i, code in enumerate(code_list)])
-                    file = io.StringIO(file_contents)
-                    io_files = [file]
-                    discord_files = [discord.File(file, "formatted_code.cpp")]
+                with contextlib.ExitStack() as stack:
+                    code_list = sections[1::2]
+                    if len(code_list) <= 10:
+                        discord_files = [discord.File(stack.enter_context(io.StringIO(code)), f"block_{i + 1}.cpp") for i, code in enumerate(code_list)]
+                    else:
+                        file_contents = "".join([f"/* [Block #{i + 1}] */\n{code}\n" for i, code in enumerate(code_list)])
+                        discord_files = [discord.File(stack.enter_context(io.StringIO(file_contents)), "formatted_code.cpp")]
 
-                try:
-                    result = f"{name_target_author} formatted code:\n{_create_alt_format_body(non_code_list, code_list)}"
+                    result = f"{name_target_author} formatted code:\n{_create_alt_format_body(sections)}"
                     await ctx.reply(result, files=discord_files)
-                finally:
-                    [f.close() for f in io_files]
         except Exception as e:
             await ctx.send(f"There was an error sending the formatted message:\n{e}")
             raise e
