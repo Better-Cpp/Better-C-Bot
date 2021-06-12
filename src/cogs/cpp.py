@@ -1,7 +1,37 @@
 from discord.ext import commands
 import urllib.parse as parse
 import discord
+import subprocess
+import re
+import io
+import datetime
+import contextlib
 
+_code_block_regex = re.compile(r"\s?```(c|cpp|cxx|cc)?\n([\s\S]+?)```\s?", re.I | re.M)
+_inline_code_regex = re.compile(r"(?<!`)(``?)(?!`)(.+?)(?<!`)\1(?!`)", re.M)
+
+def _clang_format(code, style: str = None):
+    valid_styles = ["llvm", "gnu", "google", "chromium", "microsoft", "mozilla", "webkit"]
+
+    command = ["/usr/bin/clang-format"]
+    if style in valid_styles:
+        command.extend(["--style", style])
+
+    return subprocess.run(command, input=code, capture_output=True, text=True).stdout
+
+def _create_format_body(sections):
+    sections = sections.copy()
+    sections[1::2] = [f"```c\n{code}```" for code in sections[1::2]]
+    return "".join(sections)
+
+def _create_alt_format_body(sections):
+    # if there's no non-code, just return empty string because there's no point in signifying
+    # where the code blocks were in the original text if that text was solely code blocks
+    if len("".join(sections[::2]).strip()) == 0:
+        return ""
+    sections = sections.copy()
+    sections[1::2] = [f"\n[Block #{i + 1}]\n" for i in range(len(sections[1::2]))]
+    return "".join(sections)
 
 class cpp(commands.Cog, name="C++"):
     """Commands made for C++
@@ -48,7 +78,7 @@ class cpp(commands.Cog, name="C++"):
                 res["libs"].append(path.split(" "))
 
         return res
-
+        
     @commands.command()
     async def cppref(self, ctx, *, query: str):
         """Search for a C++ item on cppreference -- WIP, can be better"""
@@ -131,7 +161,80 @@ class cpp(commands.Cog, name="C++"):
             return await ctx.send("Failed to find lectures role")
         await ctx.author.add_roles(role)
         await ctx.send("Gave you the role!")
+    @commands.command(aliases=["f"])
+    async def format(self, ctx: commands.Context, style = None):
+        """Format C or C++ code in the message you are replying to. Usage: !format [style]"""
 
+        target_msg: discord.Message = ctx.message.reference and ctx.message.reference.resolved
+        if target_msg == None:
+            await ctx.reply("You must reply to an existing message with this command in order to format it.")
+            return
+        elif target_msg.author == self.bot.user:
+            await ctx.reply("No.")
+            return
+        elif len(target_msg.content) == 0:
+            await ctx.reply("Nothing to format.")
+            return
+
+        # Convert inline code into code blocks, if any exist they will be formatted in the next part of the code.
+        processed = target_msg.content
+        inline_code_matches = list(_inline_code_regex.finditer(processed))
+
+        for match in reversed(inline_code_matches):
+            start_inner = match.start(2)
+            end_inner = match.end(2)
+            processed = f"{processed[:match.start()]}```\n{processed[start_inner:end_inner]}```{processed[match.end():]}"
+
+        code_block_matches = list(_code_block_regex.finditer(processed))
+
+        sections = []
+
+        if len(code_block_matches) != 0:
+            last_end = 0
+
+            for match in code_block_matches:
+                # Start and end of group 2 of the match, which is the inner part of the inline code
+                start_inner = match.start(2)
+                end_inner = match.end(2)
+
+                formatted_code = _clang_format(processed[start_inner:end_inner], style)
+                sections.append(processed[last_end:match.start()])
+                sections.append(formatted_code)
+                last_end = match.end()
+            sections.append(processed[last_end:])
+        else:
+            formatted_code = _clang_format(target_msg.content, style)
+            sections = ["", formatted_code, ""]
+
+        if ctx.message.author != target_msg.author:
+            name_target_author = f"{target_msg.author}'s"
+        else:
+            name_target_author = "Your"
+
+        result = f"{name_target_author} formatted code:\n{_create_format_body(sections)}"
+
+        try:
+            if len(result) <= 2000:
+                await ctx.reply(result)
+            else:
+                with contextlib.ExitStack() as stack:
+                    # slice sections starting from 1 with a step of 2, since every other section is a code section
+                    code_list = sections[1::2]
+                    if len(code_list) <= 10:
+                        files = [discord.File(stack.enter_context(io.StringIO(code)), f"block_{i + 1}.cpp") for i, code in enumerate(code_list)]
+                    else:
+                        file_contents = "".join([f"/* [Block #{i + 1}] */\n{code}\n" for i, code in enumerate(code_list)])
+                        files = [discord.File(stack.enter_context(io.StringIO(file_contents)), "formatted_code.cpp")]
+
+                    result = f"{name_target_author} formatted code:\n{_create_alt_format_body(sections)}"
+                    await ctx.reply(result, files=files)
+        except Exception as e:
+            await ctx.send(f"There was an error sending the formatted message:\n{e}")
+            raise e
+
+        # if the original message is less than 10 mins old, delete it to reduce spamminess
+        if (datetime.datetime.now() - target_msg.created_at).total_seconds() <= 600:
+            await target_msg.delete();
 
 def setup(bot):
     bot.add_cog(cpp(bot))
