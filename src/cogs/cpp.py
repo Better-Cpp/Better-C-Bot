@@ -177,11 +177,14 @@ class cpp(commands.Cog, name="C++"):
 
         target_msg: discord.Message = ctx.message.reference and ctx.message.reference.resolved
         if target_msg == None:
-            await ctx.send("You must reply to an existing message with this command in order to format it.")
+            await ctx.reply("You must reply to an existing message with this command in order to format it.")
             return
-
-        # This will be for when support for formatting attached text files is added.
-        text_attachments = [x for x in ctx.message.attachments if x.content_type.startswith("text/")]
+        elif target_msg.author == self.bot.user:
+            await ctx.reply("No.")
+            return
+        elif len(target_msg.content) == 0:
+            await ctx.reply("Nothing to format.")
+            return
 
         # Convert inline code into code blocks, if any exist they will be formatted in the next part of the code.
         processed = target_msg.content
@@ -194,10 +197,10 @@ class cpp(commands.Cog, name="C++"):
 
         code_block_matches = list(_code_block_regex.finditer(processed))
 
-        # array of non-code related text
-        non_code = []
-        # array of code block contents
-        code = []
+        # list of non-code sections of the original message
+        non_code_list = []
+        # list of code sections of the original message
+        code_list = []
 
         if len(code_block_matches) != 0:
             last_end = 0
@@ -208,40 +211,47 @@ class cpp(commands.Cog, name="C++"):
                 end_inner = match.end(2)
 
                 formatted_code = _clang_format(processed[start_inner:end_inner], style)
-                non_code.append(processed[last_end:match.start()])
-                code.append(formatted_code)
+                non_code_list.append(processed[last_end:match.start()])
+                code_list.append(formatted_code)
                 last_end = match.end()
 
-            non_code.append(processed[last_end:])
+            non_code_list.append(processed[last_end:])
         else:
             formatted_code = _clang_format(target_msg.content, style)
-            non_code = ["", ""]
-            code = [formatted_code]
+            non_code_list = ["", ""]
+            code_list = [formatted_code]
 
         if ctx.message.author != target_msg.author:
             name_target_author = f"{target_msg.author}'s"
         else:
             name_target_author = "Your"
 
-        result = f"{name_target_author} formatted code:\n{_create_format_body(non_code, code)}"
+        result = f"{name_target_author} formatted code:\n{_create_format_body(non_code_list, code_list)}"
 
-        if len(result) <= 4000:
-            await ctx.send(result)
-        else:
-            if len(code) <= 10:
-                files_ = [io.StringIO(x) for x in code]
-                files = [discord.File(f, f"block_{i + 1}.cpp") for i, f in enumerate(files_)]
+        try:
+            if len(result) <= 2000:
+                await ctx.reply(result)
             else:
-                file = io.StringIO()
-                for i, c in enumerate(code):
-                    file.write(f"/* [Block #{i + 1}] */\n{c}\n")
-                files_ = [file]
-                files = [discord.File(file, "formatted_code.cpp")]
+                if len(code_list) <= 10:
+                    io_files = [io.StringIO(x) for x in code_list]
+                    discord_files = [discord.File(f, f"block_{i + 1}.cpp") for i, f in enumerate(io_files)]
+                else:
+                    file_contents = "".join([f"/* [Block #{i + 1}] */\n{code}\n" for i, code in enumerate(code_list)])
+                    file = io.StringIO(file_contents)
+                    io_files = [file]
+                    discord_files = [discord.File(file, "formatted_code.cpp")]
 
-            result = f"{name_target_author} formatted code:\n{_create_alt_format_body(non_code, code)}"
+                try:
+                    result = f"{name_target_author} formatted code:\n{_create_alt_format_body(non_code_list, code_list)}"
+                    await ctx.reply(result, files=discord_files)
+                finally:
+                    [f.close() for f in io_files]
+        except Exception as e:
+            await ctx.send(f"There was an error sending the formatted message:\n{e}")
+            raise e
 
-            await ctx.send(result, files=files)
-        if (datetime.datetime.now() - target_msg.created_at).total_seconds() <= 7200:
+        # if the original message is less than 10 mins old, delete it to reduce spamminess
+        if (datetime.datetime.now() - target_msg.created_at).total_seconds() <= 600:
             await target_msg.delete();
 
 def setup(bot):
