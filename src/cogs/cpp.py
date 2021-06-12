@@ -7,7 +7,7 @@ import io
 import datetime
 import contextlib
 
-_code_block_regex = re.compile(r"\s?```(c|cpp|cxx|cc)?\n([\s\S]+?)```\s?", re.I | re.M)
+_code_block_regex = re.compile(r"\s?```(c|cpp|cxx|cc|c\+\+)?\n([\s\S]+?)```\s?", re.I | re.M)
 _inline_code_regex = re.compile(r"(?<!`)(``?)(?!`)(.+?)(?<!`)\1(?!`)", re.M)
 
 def _clang_format(code, style: str = None):
