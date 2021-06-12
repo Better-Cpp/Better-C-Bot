@@ -25,9 +25,8 @@ def _create_format_body(sections):
     return "".join(sections)
 
 def _create_alt_format_body(sections):
-    # if there's no non-code, just return empty string
-    # because there's no point in signifying where the
-    # code blocks were if the original text was solely code blocks
+    # if there's no non-code, just return empty string because there's no point in signifying
+    # where the code blocks were in the original text if that text was solely code blocks
     if len("".join(sections[::2]).strip()) == 0:
         return ""
     sections = sections.copy()
@@ -205,7 +204,7 @@ class cpp(commands.Cog, name="C++"):
             sections.append(processed[last_end:])
         else:
             formatted_code = _clang_format(target_msg.content, style)
-            sections = ['', formatted_code, '']
+            sections = ["", formatted_code, ""]
 
         if ctx.message.author != target_msg.author:
             name_target_author = f"{target_msg.author}'s"
@@ -219,15 +218,16 @@ class cpp(commands.Cog, name="C++"):
                 await ctx.reply(result)
             else:
                 with contextlib.ExitStack() as stack:
+                    # slice sections starting from 1 with a step of 2, since every other section is a code section
                     code_list = sections[1::2]
                     if len(code_list) <= 10:
-                        discord_files = [discord.File(stack.enter_context(io.StringIO(code)), f"block_{i + 1}.cpp") for i, code in enumerate(code_list)]
+                        files = [discord.File(stack.enter_context(io.StringIO(code)), f"block_{i + 1}.cpp") for i, code in enumerate(code_list)]
                     else:
                         file_contents = "".join([f"/* [Block #{i + 1}] */\n{code}\n" for i, code in enumerate(code_list)])
-                        discord_files = [discord.File(stack.enter_context(io.StringIO(file_contents)), "formatted_code.cpp")]
+                        files = [discord.File(stack.enter_context(io.StringIO(file_contents)), "formatted_code.cpp")]
 
                     result = f"{name_target_author} formatted code:\n{_create_alt_format_body(sections)}"
-                    await ctx.reply(result, files=discord_files)
+                    await ctx.reply(result, files=files)
         except Exception as e:
             await ctx.send(f"There was an error sending the formatted message:\n{e}")
             raise e
