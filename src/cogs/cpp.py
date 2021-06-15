@@ -7,7 +7,7 @@ import io
 import datetime
 import contextlib
 
-_code_block_regex = re.compile(r"\s?```.+?\n([\s\S]+?)```\s?", re.I)
+_code_block_regex = re.compile(r"\s*```(?:\S*?\n)?([\s\S]+?)```\s*", re.I)
 _inline_code_regex = re.compile(r"(?<!`)(``?)(?!`)([\s\S]+?)(?<!`)\1(?!`)")
 
 def _clang_format(code, style: str = None):
@@ -194,9 +194,9 @@ class cpp(commands.Cog, name="C++"):
             last_end = 0
 
             for match in code_block_matches:
-                # Start and end of group 2 of the match, which is the inner part of the inline code
-                start_inner = match.start(2)
-                end_inner = match.end(2)
+                # Start and end of group 1 of the match, which is the inner part of the inline code
+                start_inner = match.start(1)
+                end_inner = match.end(1)
 
                 formatted_code = _clang_format(processed[start_inner:end_inner], style)
                 sections.append(processed[last_end:match.start()])
