@@ -7,8 +7,8 @@
         553478921870508061
     ],
     "staff_role": 583646707938623489,
-    "duplicate_thresh": 0.8,
-    "duplication_enabled": true,
+    "dupe_thresh": 0.8,
+    "dupe_enabled": true,
     "spam_thresh": 5,
     "spam_enabled": true
 }

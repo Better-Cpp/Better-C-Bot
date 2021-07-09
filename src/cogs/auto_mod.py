@@ -24,7 +24,14 @@ class AutoMod(commands.Cog):
                 self.badwords.add(line.strip().lower())
 
     async def is_duplicate(self, message):
+        everyone = message.guild.default_role
+
         for channel in message.guild.text_channels:
+            # People who actually have a role that is special probably won't do dumb stuff
+            _, denied = channel.overwrites_for(everyone).pair()
+            if denied.send_messages:
+                continue
+
             if channel == message.channel:
                 continue
 
