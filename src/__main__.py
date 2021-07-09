@@ -14,18 +14,18 @@ bot = commands.Bot(prefix, case_insensitive=True,
 @bot.event
 async def on_ready():
     bot.user_cogs = [
-        # "src.cogs.verona",
-        # "src.cogs.cpp",
-        # "src.cogs.help",
-        # "src.cogs.qt",
-        # "src.cogs.rules",
-        # "src.cogs.challenges",
-        # "src.cogs.stats",
-        # "src.cogs.rust",
+        "src.cogs.verona",
+        "src.cogs.cpp",
+        "src.cogs.help",
+        "src.cogs.qt",
+        "src.cogs.rules",
+        "src.cogs.challenges",
+        "src.cogs.stats",
+        "src.cogs.rust",
         "src.cogs.auto_mod",
-        # "src.cogs.general",
-        # "src.cogs.admin",
-        # "src.cogs.error_handler",
+        "src.cogs.general",
+        "src.cogs.admin",
+        "src.cogs.error_handler",
     ]
     for cog in bot.user_cogs:
         print(f"Loading {cog}...")
