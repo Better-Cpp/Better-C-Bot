@@ -101,10 +101,23 @@ class RulesEnforcer(commands.Cog, name="Rules"):
                 await msg.reply("Not taking any action and resetting the join detection")
 
             if reaction.emoji == checkmark:
-                reply = await msg.reply("Users assumed to be bots:\n" + ",\n".join(map(lambda x: f"<@{x['id']}>",
+                wizard_msg = ( "Users assumed to be bots:\n" + ",\n".join(map(lambda x: f"<@{x['id']}>",
                     filter(lambda x: x["assumed_bot"], self._recent_joins)))
                     + "\nUsers assumed to not be bots:\n" + ",\n".join(map(lambda x: f"<@{x['id']}>",
-                    filter(lambda x: not x["assumed_bot"], self._recent_joins))))
+                    filter(lambda x: not x["assumed_bot"], self._recent_joins))) )
+
+                messages = []
+                while len(wizard_msg) > self.file["max_msg_size"]:
+                    chunk = wizard_msg[0:self.file["max_msg_size"]]
+                    end_index = chunk.rfind('\n')
+                    messages.append(chunk[0:end_index])
+                    wizard_msg = wizard_msg[end_index:]
+
+                messages.append(wizard_msg)
+
+                reply = msg
+                for message in messages:
+                    reply = await reply.reply(message)
 
                 await reply.add_reaction(cross)
                 await reply.add_reaction(checkmark)
