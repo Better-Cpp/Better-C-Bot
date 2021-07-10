@@ -66,12 +66,16 @@ class RulesEnforcer(commands.Cog, name="Rules"):
                 if current_time - x["join_time"] <= self.file["massjoin_window"]
             ]
 
-        self._recent_joins.append({"join_time": current_time, "id": member.id,
-            "assumed_bot": (
-                ( member.default_avatar_url == member.avatar_url if self.file["massjoin_default_pfp"] else True )
-                and ( time.time() - member.created_at.timestamp() < self.file["massjoin_min_acc_age_val"]
-                    if self.file["massjoin_min_acc_age"] else True ) )
-            })
+        is_bot_pfp = member.default_avatar_url == member.avatar_url if self.file["massjoin_default_pfp"] else True
+
+        is_bot_age = ( current_time - member.created_at.timestamp() < self.file["massjoin_min_acc_age_val"]
+                if self.file["massjoin_min_acc_age"] else True )
+
+        self._recent_joins.append({
+            "join_time": current_time,
+            "id": member.id,
+            "assumed_bot": is_bot_pfp and is_bot_age
+        })
 
 
         join_amount = len(self._recent_joins)
@@ -79,17 +83,14 @@ class RulesEnforcer(commands.Cog, name="Rules"):
         if join_amount >= self.file["massjoin_amount"] and not self.massjoin_active:
             self.massjoin_active = True
 
-            cross = "❎"
-            checkmark = "✅"
-
             msg = await self._notify_staff(member.guild,
-                    f"Mass member join detected. React with {checkmark} to take action or with {cross} to ignore")
+                    f"Mass member join detected. React with {self.file['yes_react']} to take action or with {self.file['no_react']} to ignore")
 
-            await msg.add_reaction(cross)
-            await msg.add_reaction(checkmark)
+            await msg.add_reaction(self.file["no_react"])
+            await msg.add_reaction(self.file["yes_react"])
 
-            def _check(reaction, user, msg):
-                return ( reaction.message.id == msg.id
+            def _check(reaction, user, reaction_msg):
+                return ( reaction.message.id == reaction_msg.id
                         and any(role.id == self.file["staff_role"] for role in user.roles)
                         and user.id != self.bot.user.id )
 
@@ -97,10 +98,10 @@ class RulesEnforcer(commands.Cog, name="Rules"):
                     check=lambda reaction, user: _check(reaction, user, msg),
                     timeout=self.file["massjoin_notif_timeout"])
 
-            if reaction.emoji == cross:
+            if reaction.emoji == self.file["no_react"]:
                 await msg.reply("Not taking any action and resetting the join detection")
 
-            if reaction.emoji == checkmark:
+            if reaction.emoji == self.file["yes_react"]:
                 wizard_msg = ( "Users assumed to be bots:\n" + ",\n".join(map(lambda x: f"<@{x['id']}>",
                     filter(lambda x: x["assumed_bot"], self._recent_joins)))
                     + "\nUsers assumed to not be bots:\n" + ",\n".join(map(lambda x: f"<@{x['id']}>",
@@ -119,18 +120,17 @@ class RulesEnforcer(commands.Cog, name="Rules"):
                 for message in messages:
                     reply = await reply.reply(message)
 
-                await reply.add_reaction(cross)
-                await reply.add_reaction(checkmark)
+                await reply.add_reaction(self.file["no_react"])
+                await reply.add_reaction(self.file["yes_react"])
 
                 reaction, user = await self.bot.wait_for('reaction_add',
                         check=lambda reaction, user: _check(reaction, user, reply),
                         timeout=self.file["massjoin_wizard_timeout"])
 
-                if reaction.emoji == cross:
+                if reaction.emoji == self.file["no_react"]:
                     await reply.reply("Not banning any users and resetting the join detection")
-                    await reply.clear_reactions()
 
-                if reaction.emoji == checkmark:
+                if reaction.emoji == self.file["yes_react"]:
                     for user in self._recent_joins:
                         if user["assumed_bot"]:
                             await member.guild.ban(
