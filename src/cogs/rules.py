@@ -20,8 +20,7 @@ class RulesEnforcer(commands.Cog, name="Rules"):
         self._recent_joins = []
 
         self.massjoin_detect = True
-
-        self.next_massjoin_notif = time.time()
+        self.massjoin_active = False
 
         with open("src/backend/database.json", 'r') as f: # Seems to be unavoidable
             self.file = json.load(f)
@@ -48,9 +47,11 @@ class RulesEnforcer(commands.Cog, name="Rules"):
 
     async def _notify_staff(self, guild, message):
         role = self.file["staff_role"]
+
         channel = guild.system_channel
         if channel:
-            await channel.send(f"<@&{role}> {message}.")
+            return await channel.send(f"<@{role}> {message}")
+
 
     @commands.Cog.listener()
     async def on_member_join(self, member):
@@ -59,19 +60,92 @@ class RulesEnforcer(commands.Cog, name="Rules"):
 
         current_time = time.time()
 
-        self._recent_joins = [
-            x for x in self._recent_joins
-            if current_time - x["join_time"] <= self.file["massjoin_window"]
-        ]
+        if not self.massjoin_active:
+            self._recent_joins = [
+                x for x in self._recent_joins
+                if current_time - x["join_time"] <= self.file["massjoin_window"]
+            ]
 
-        self._recent_joins.append({"join_time": current_time, "id": member.id})
+        is_bot_pfp = member.default_avatar_url == member.avatar_url if self.file["massjoin_default_pfp"] else True
+
+        is_bot_age = ( current_time - member.created_at.timestamp() < self.file["massjoin_min_acc_age_val"]
+                if self.file["massjoin_min_acc_age"] else True )
+
+        self._recent_joins.append({
+            "join_time": current_time,
+            "id": member.id,
+            "assumed_bot": is_bot_pfp and is_bot_age
+        })
+
 
         join_amount = len(self._recent_joins)
 
-        if join_amount >= self.file["massjoin_amount"] and self.next_massjoin_notif <= current_time:
-            first_joined_id = self._recent_joins[0]["id"]
-            await self._notify_staff(member.guild, "Mass member join detected. " + f"First join ID: `{first_joined_id}`")
-            self.next_massjoin_notif = current_time + self.file["massjoin_notif_timeout"]
+        if join_amount >= self.file["massjoin_amount"] and not self.massjoin_active:
+            self.massjoin_active = True
+
+            msg = await self._notify_staff(member.guild,
+                    f"Mass member join detected. React with {self.file['yes_react']} to take action or with {self.file['no_react']} to ignore")
+
+            await msg.add_reaction(self.file["no_react"])
+            await msg.add_reaction(self.file["yes_react"])
+
+            def _check(reaction, user, reaction_msg):
+                return ( reaction.message.id == reaction_msg.id
+                        and any(role.id == self.file["staff_role"] for role in user.roles)
+                        and user.id != self.bot.user.id )
+
+            reaction, user = await self.bot.wait_for('reaction_add',
+                    check=lambda reaction, user: _check(reaction, user, msg),
+                    timeout=self.file["massjoin_notif_timeout"])
+
+            if reaction.emoji == self.file["no_react"]:
+                await msg.reply("Not taking any action and resetting the join detection")
+
+            if reaction.emoji == self.file["yes_react"]:
+                wizard_msg = ( "Users assumed to be bots:\n" + ",\n".join(map(lambda x: f"<@{x['id']}>",
+                    filter(lambda x: x["assumed_bot"], self._recent_joins)))
+                    + "\nUsers assumed to not be bots:\n" + ",\n".join(map(lambda x: f"<@{x['id']}>",
+                    filter(lambda x: not x["assumed_bot"], self._recent_joins))) )
+
+                messages = []
+                while len(wizard_msg) > self.file["max_msg_size"]:
+                    chunk = wizard_msg[0:self.file["max_msg_size"]]
+                    end_index = chunk.rfind('\n')
+                    messages.append(chunk[0:end_index])
+                    wizard_msg = wizard_msg[end_index:]
+
+                messages.append(wizard_msg)
+
+                reply = msg
+                for message in messages:
+                    reply = await reply.reply(message)
+
+                await reply.add_reaction(self.file["no_react"])
+                await reply.add_reaction(self.file["yes_react"])
+
+                reaction, user = await self.bot.wait_for('reaction_add',
+                        check=lambda reaction, user: _check(reaction, user, reply),
+                        timeout=self.file["massjoin_wizard_timeout"])
+
+                if reaction.emoji == self.file["no_react"]:
+                    await reply.reply("Not banning any users and resetting the join detection")
+
+                if reaction.emoji == self.file["yes_react"]:
+                    for user in self._recent_joins:
+                        if user["assumed_bot"]:
+                            await member.guild.ban(
+                                    self.bot.get_user(user["id"]) if self.bot.get_user(user["id"])
+                                        else await self.bot.fetch_user(user["id"]))
+
+                    await reply.reply("Banned the bots")
+
+                await reply.clear_reactions()
+
+            await msg.clear_reactions()
+
+            self._recent_joins.clear()
+            self.massjoin_active = False
+
 
     @commands.command()
     @commands.has_role(file["staff_role"])
