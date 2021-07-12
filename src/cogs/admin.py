@@ -13,17 +13,24 @@ class Administration(commands.Cog, name="Administration"):
         self.bot = bot
         self._last_result = None
 
-        with open("src/backend/database.json", 'r') as file:
+        with open("src/backend/database.json", "r") as file:
             self.file = json.load(file)
 
     def cleanup_code(self, content):
         """Automatically removes code blocks from the code."""
+        content = (
+            content.replace("```", "\n```") # Prevents the last line being cut off
+            .replace("'", "\'") # ' -> \'
+            .replace('"', '\"') # " -> \"
+            .strip() # Remove trailing whitespace
+        )
+
         # remove ```py\n```
-        if content.startswith('```') and content.endswith('```'):
-            return '\n'.join(content.split('\n')[1:-1])
+        if content.startswith("```") and content.endswith("```"):
+            return "\n".join(content.split("\n")[1:-1])
 
         # remove `foo`
-        return content.strip('` \n')
+        return content.strip("` \n")
 
     @commands.command(hidden=True)
     @commands.is_owner()
@@ -40,7 +47,9 @@ class Administration(commands.Cog, name="Administration"):
         for cog in self.bot.user_cogs:
             self.bot.reload_extension(cog)
 
-        await ctx.send("Updated cogs:\n```\n{}\n```".format('\n'.join(self.bot.user_cogs)))
+        await ctx.send(
+            "Updated cogs:\n```\n{}\n```".format("\n".join(self.bot.user_cogs))
+        )
 
     @commands.command(hidden=True)
     @commands.is_owner()
@@ -52,13 +61,13 @@ class Administration(commands.Cog, name="Administration"):
         #     return await ctx.send("You do not have authorization to use this command")
 
         env = {
-            'bot': self.bot,
-            'ctx': ctx,
-            'channel': ctx.channel,
-            'author': ctx.author,
-            'guild': ctx.guild,
-            'message': ctx.message,
-            '_': self._last_result
+            "bot": self.bot,
+            "ctx": ctx,
+            "channel": ctx.channel,
+            "author": ctx.author,
+            "guild": ctx.guild,
+            "message": ctx.message,
+            "_": self._last_result,
         }
 
         env.update(globals())
@@ -71,28 +80,28 @@ class Administration(commands.Cog, name="Administration"):
         try:
             exec(to_compile, env)
         except Exception as e:
-            return await ctx.send(f'```py\n{e.__class__.__name__}: {e}\n```')
+            return await ctx.send(f"```py\n{e.__class__.__name__}: {e}\n```")
 
-        func = env['func']
+        func = env["func"]
         try:
             with redirect_stdout(stdout):
                 ret = await func()
         except Exception as e:
             value = stdout.getvalue()
-            await ctx.send(f'```py\n{value}{traceback.format_exc()}\n```')
+            await ctx.send(f"```py\n{value}{traceback.format_exc()}\n```")
         else:
             value = stdout.getvalue()
             try:
-                await ctx.message.add_reaction('\u2705')
+                await ctx.message.add_reaction("\u2705")
             except:
                 pass
 
             if ret is None:
                 if value:
-                    await ctx.send(f'```py\n{value}\n```')
+                    await ctx.send(f"```py\n{value}\n```")
             else:
                 self._last_result = ret
-                await ctx.send(f'```py\n{value}{ret}\n```')
+                await ctx.send(f"```py\n{value}{ret}\n```")
 
 
 def setup(bot):
