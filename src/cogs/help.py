@@ -12,7 +12,8 @@ class Help(commands.Cog):
 
     def formatter(self, i, stack=1, ignore_hidden=False):
         for cmd in i:
-            if cmd.hidden and not ignore_hidden:
+            # If the command is hidden and we should ignore hidden commands, skip it.
+            if cmd.hidden and ignore_hidden:
                 continue
             line = '- ' + cmd.help.split("\n")[0] if cmd.help else ""
             yield "\u200b " * (stack*2) + f"►**{cmd}** {line}\n"
