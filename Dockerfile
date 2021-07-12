@@ -2,7 +2,7 @@ FROM alpine:3.13.5
 
 RUN apk update \
     && apk add clang gcc \
-    python3 py3-pip py3-lxml py3-yarl py3-chardet py3-aiohttp py3-attrs 
+    python3 py3-pip py3-lxml py3-yarl py3-chardet py3-aiohttp py3-attrs
 
 RUN adduser -D bettercbot
 USER bettercbot
@@ -18,5 +18,6 @@ COPY --chown=bettercbot:bettercbot token.txt token.txt
 COPY --chown=bettercbot:bettercbot src/__main__.py src/__main__.py
 COPY --chown=bettercbot:bettercbot src/cogs src/cogs
 COPY --chown=bettercbot:bettercbot src/backend src/backend
+
 
 CMD ["python3", "-m", "src"]

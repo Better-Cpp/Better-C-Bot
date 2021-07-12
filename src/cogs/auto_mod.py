@@ -36,6 +36,14 @@ class AutoMod(commands.Cog):
                 continue
 
             async for candidate in channel.history(limit=10):
+                if candidate.author != message.author:
+                    continue
+
+                # if the message has the same attachments, we probably don't need to check the text
+                if message.attachments == candidate.attachments:
+                    return True, candidate
+
+
                 if (
                     SequenceMatcher(None, message.content, candidate.content).ratio()
                     > self.database["dupe_thresh"]
