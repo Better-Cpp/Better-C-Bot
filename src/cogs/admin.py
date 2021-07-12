@@ -38,11 +38,8 @@ class Administration(commands.Cog, name="Administration"):
         """
         ReLoads all cogs.
         """
-        # Atm the only person in the permitted array is the owner, so instead of doing
-        # The below, we'll just use the built-in is_owner() check since it's also easier to test these
-
-        # if ctx.message.author.id not in self.file["permitted"]:
-        #     return await ctx.send("You do not have authorization to use this command")
+        if ctx.message.author.id not in self.file["permitted"]:
+            return await ctx.send("You do not have authorization to use this command")
 
         for cog in self.bot.user_cogs:
             self.bot.reload_extension(cog)
@@ -57,8 +54,8 @@ class Administration(commands.Cog, name="Administration"):
         """
         Evaluates some code
         """
-        # if ctx.message.author.id not in self.file["permitted"]:
-        #     return await ctx.send("You do not have authorization to use this command")
+        if ctx.message.author.id not in self.file["permitted"]:
+            return await ctx.send("You do not have authorization to use this command")
 
         env = {
             "bot": self.bot,
