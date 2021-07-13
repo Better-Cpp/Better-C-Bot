@@ -16,7 +16,7 @@ class AutoMod(commands.Cog):
         self.read_words()
 
         with open("src/backend/database.json") as file:
-            self.database = json.load(file)
+            self.file = json.load(file)
 
     def read_words(self):
         with open("badwords.txt") as file:
@@ -35,11 +35,30 @@ class AutoMod(commands.Cog):
             if channel == message.channel:
                 continue
 
-            async for candidate in channel.history(limit=10):
+            async for candidate in channel.history(limit=30):
+                if candidate.author != message.author:
+                    continue
+
+                # if sent more than 12 hours ago, ignore it, it's probably fine
+                if (
+                    message.created_at.timestamp() - candidate.created_at.timestamp()
+                    > 3600 * 12
+                ):
+                    continue
+
+                # if the message has the same attachments, we probably don't need to check the text
+                if message.attachments and message.attachments == candidate.attachments:
+                    return True, candidate
+
                 if (
                     SequenceMatcher(None, message.content, candidate.content).ratio()
-                    > self.database["dupe_thresh"]
+                    > self.file["dupe_thresh"]
                 ):
+                    # if the message was a command, we can just ignore it
+                    ctx = await self.bot.get_context(candidate)
+                    if ctx.command:
+                        continue
+
                     return True, candidate
 
         # To keep from getting errors
@@ -68,18 +87,20 @@ class AutoMod(commands.Cog):
 
     @commands.group(hidden=True, aliases=["duplication"])
     @commands.guild_only()
-    @commands.is_owner()
     async def duplicate(self, ctx):
         """
         Duplication detection options
         """
+        if ctx.message.author.id not in self.file["permitted"]:
+            return await ctx.send("You do not have authorization to use this command")
+
         if ctx.invoked_subcommand is None:
-            dupe_enabled = "enabled" if self.database["dupe_enabled"] else "disabled"
+            dupe_enabled = "enabled" if self.file["dupe_enabled"] else "disabled"
 
             e = discord.Embed(
                 title=f"Duplicate message detection",
                 description="__Options:__"
-                + f"►\n**thresh**\n- Current threshold: **{self.database['dupe_thresh']}**\n"
+                + f"►\n**thresh**\n- Current threshold: **{self.file['dupe_thresh']}**\n"
                 + f"►\n**toggle**\n- Currently **{dupe_enabled}**",
             )
             return await ctx.send(embed=e)
@@ -89,9 +110,9 @@ class AutoMod(commands.Cog):
         """
         Change the threshold for the duplication detection. Default is 0.8
         """
-        self.database["dupe_thresh"] = new_thresh
+        self.file["dupe_thresh"] = new_thresh
         with open("src/backend/database.json", "w+") as file:
-            json.dump(self.database, file)
+            json.dump(self.file, file)
 
         await ctx.reply(f"The new duplication match threshold is {new_thresh}")
 
@@ -100,29 +121,31 @@ class AutoMod(commands.Cog):
         """
         Toggle the duplication detection. On by default
         """
-        self.database["dupe_enabled"] = not self.database["dupe_enabled"]
+        self.file["dupe_enabled"] = not self.file["dupe_enabled"]
 
         with open("src/backend/database.json", "w+") as file:
-            json.dump(self.database, file, indent=4)
+            json.dump(self.file, file, indent=4)
 
-        new_enabled = "enabled" if self.database["dupe_enabled"] else "disabled"
+        new_enabled = "enabled" if self.file["dupe_enabled"] else "disabled"
         await ctx.reply(f"Duplicated message detection is now {new_enabled}")
 
     # Commented out because I will do spam detection later
     # @commands.group(hidden=True, aliases=["duplication"])
     # @commands.guild_only()
-    # @commands.is_owner()
     # async def spam(self, ctx):
     #     """
     #     Duplication detection options
     #     """
+    #     if ctx.message.author.id not in self.file["permitted"]:
+    #         return await ctx.send("You do not have authorization to use this command")
+    #
     #     if ctx.invoked_subcommand is None:
-    #         spam_enabled = "enabled" if self.database["spam_enabled"] else "disabled"
-
+    #         spam_enabled = "enabled" if self.file["spam_enabled"] else "disabled"
+    #
     #         e = discord.Embed(
     #             title=f"Spam message detection",
     #             description="__Options:__"
-    #             + f"►\n**thresh**\n- Current threshold: **{self.database['spam_thresh']}**\n"
+    #             + f"►\n**thresh**\n- Current threshold: **{self.file['spam_thresh']}**\n"
     #             + f"►\n**toggle**\n- Currently **{spam_enabled}**",
     #         )
     #         return await ctx.send(embed=e)
@@ -132,9 +155,9 @@ class AutoMod(commands.Cog):
     #     """
     #     Change the threshold for the spam detection. Default is 5
     #     """
-    #     self.database["spam_thresh"] = new_thresh
+    #     self.file["spam_thresh"] = new_thresh
     #     with open("src/backend/database.json", "w+") as file:
-    #         json.dump(self.database, file)
+    #         json.dump(self.file, file)
 
     #     await ctx.reply(f"The new spam match threshold is {new_thresh}")
 
@@ -143,12 +166,12 @@ class AutoMod(commands.Cog):
     #     """
     #     Toggle the spam detection. On by default
     #     """
-    #     self.database["spam_enabled"] = not self.database["spam_enabled"]
+    #     self.file["spam_enabled"] = not self.file["spam_enabled"]
 
     #     with open("src/backend/database.json", "w+") as file:
-    #         json.dump(self.database, file, indent=4)
+    #         json.dump(self.file, file, indent=4)
 
-    #     new_enabled = "enabled" if self.database["spam_enabled"] else "disabled"
+    #     new_enabled = "enabled" if self.file["spam_enabled"] else "disabled"
     #     await ctx.reply(f"Spam message detection is now {new_enabled}")
 
 
