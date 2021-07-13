@@ -33,7 +33,6 @@ class Administration(commands.Cog, name="Administration"):
         return content.strip("` \n")
 
     @commands.command(hidden=True)
-    @commands.is_owner()
     async def reload(self, ctx):
         """
         ReLoads all cogs.
@@ -49,7 +48,6 @@ class Administration(commands.Cog, name="Administration"):
         )
 
     @commands.command(hidden=True)
-    @commands.is_owner()
     async def eval(self, ctx, *, body: str):
         """
         Evaluates some code

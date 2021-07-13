@@ -30,18 +30,19 @@ def get_output_path(num: int) -> str:
     return f"/opt/verona-bot/output/{num}.txt"
 
 
-async def run_container(
-    num: int, timeout_count: int = 30
-) -> tuple[bool, str,]:
-    container = docker_client.containers.run(
-        "yuhanuncitgez/verona-bot:latest",
-        f'/opt/verona-bot-scripts/run.sh "{num}"',
-        stdout=True,
-        stderr=True,
-        auto_remove=True,
-        detach=True,
-        volumes={"/opt/verona-bot": {"bind": "/opt/verona-bot", "mode": "rw"}},
-    )
+async def run_container(num: int, timeout_count: int = 30) -> (bool, str, ):
+    container = docker_client.containers.run("yuhanuncitgez/verona-bot:latest", f"/opt/verona-bot-scripts/run.sh \"{num}\"",
+                                             stdout=True,
+                                             stderr=True,
+                                             auto_remove=True,
+                                             detach=True,
+                                             volumes={
+                                                 "/opt/verona-bot": {
+                                                     "bind": "/opt/verona-bot",
+                                                     "mode": "rw"
+                                                 }
+                                             }
+                                             )
     output_path = get_output_path(num)
     for _ in range(timeout_count + 1):
         if os.path.isfile(output_path):
