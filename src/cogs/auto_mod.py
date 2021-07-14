@@ -24,6 +24,13 @@ class AutoMod(commands.Cog):
                 self.badwords.add(line.strip().lower())
 
     async def is_duplicate(self, message):
+        # apparently @everyone is in this list
+        if message.author.roles.len() > 1:
+            return False, None
+
+        if message.clean_content.len() < 50:
+            return False, None
+
         everyone = message.guild.default_role
 
         for channel in message.guild.text_channels:
@@ -46,8 +53,10 @@ class AutoMod(commands.Cog):
                 ):
                     continue
 
+                msg_attachments = [str(i) for i in message.attachments]
+                can_attachments = [str(i) for i in candidate.attachments]
                 # if the message has the same attachments, we probably don't need to check the text
-                if message.attachments and message.attachments == candidate.attachments:
+                if message.attachments and msg_attachments == can_attachments:
                     return True, candidate
 
                 if (
@@ -62,7 +71,7 @@ class AutoMod(commands.Cog):
                     return True, candidate
 
         # To keep from getting errors
-        return None, None
+        return False, None
 
     @commands.Cog.listener()
     async def on_message(self, msg):
