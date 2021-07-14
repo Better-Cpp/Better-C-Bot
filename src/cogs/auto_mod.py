@@ -25,10 +25,10 @@ class AutoMod(commands.Cog):
 
     async def is_duplicate(self, message):
         # apparently @everyone is in this list
-        if message.author.roles.len() > 1:
+        if len(message.author.roles) > 1:
             return False, None
 
-        if message.clean_content.len() < 50:
+        if len(message.clean_content) < 50:
             return False, None
 
         everyone = message.guild.default_role
