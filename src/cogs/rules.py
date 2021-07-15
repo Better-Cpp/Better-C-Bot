@@ -86,7 +86,7 @@ class RulesEnforcer(commands.Cog, name="Rules"):
 
                 msg = await self._notify_staff(member.guild,
                     f"Mass member join detected. React with {self.file['yes_react']} to take action "
-                    + "or with {self.file['no_react']} to ignore")
+                    + f"or with {self.file['no_react']} to ignore")
 
                 await msg.add_reaction(self.file["no_react"])
                 await msg.add_reaction(self.file["yes_react"])
