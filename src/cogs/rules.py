@@ -133,13 +133,20 @@ class RulesEnforcer(commands.Cog, name="Rules"):
                         await reply.reply("Not banning any users and resetting the join detection")
 
                     if reaction.emoji == self.file["yes_react"]:
-                        for user in self._recent_joins:
-                            if user["assumed_bot"]:
-                                await member.guild.ban(
-                                    self.bot.get_user(user["id"]) if self.bot.get_user(user["id"])
-                                        else await self.bot.fetch_user(user["id"]))
+                        bot_count = sum(1 for x in self._recent_joins if x['assumed_bot'])
+                        ban_start_msg = await reply.reply(f"Banning {bot_count} user[s]")
 
-                        await reply.reply("Banned the bots")
+                        try:
+                            for user in self._recent_joins:
+                                if user["assumed_bot"]:
+                                    await member.guild.ban(
+                                        self.bot.get_user(user["id"]) if self.bot.get_user(user["id"])
+                                            else await self.bot.fetch_user(user["id"]))
+                        except:
+                            await ban_start_msg.reply("Banning failed")
+
+                        else:
+                            await ban_start_msg.reply("Banned the bots")
 
                     await reply.clear_reactions()
 
