@@ -52,6 +52,26 @@ class RulesEnforcer(commands.Cog, name="Rules"):
         if channel:
             return await channel.send(f"<@{role}> {message}")
 
+    def _chunk_message(self, msg):
+        messages = []
+        while len(msg) > self.file["max_msg_size"]:
+            chunk = msg[:self.file["max_msg_size"]]
+
+            end_index = chunk.rfind('\n')
+            if end_index == -1:
+                end_index = self.file["max_msg_size"]
+
+            messages.append(chunk[:end_index])
+            msg = msg[end_index + 1:]
+
+        messages.append(msg)
+        return messages
+
+    async def _reply_chunks(self, reply, msgs):
+        for msg in msgs:
+            reply = await reply.reply(msg)
+
+        return reply
 
     @commands.Cog.listener()
     async def on_member_join(self, member):
@@ -109,18 +129,8 @@ class RulesEnforcer(commands.Cog, name="Rules"):
                         + "\nUsers assumed to not be bots:\n" + ",\n".join(map(lambda x: f"<@{x['id']}>",
                         filter(lambda x: not x["assumed_bot"], self._recent_joins))) )
 
-                    messages = []
-                    while len(wizard_msg) > self.file["max_msg_size"]:
-                        chunk = wizard_msg[0:self.file["max_msg_size"]]
-                        end_index = chunk.rfind('\n')
-                        messages.append(chunk[0:end_index])
-                        wizard_msg = wizard_msg[end_index:]
 
-                    messages.append(wizard_msg)
-
-                    reply = msg
-                    for message in messages:
-                        reply = await reply.reply(message)
+                    reply = await self._reply_chunks(msg, self._chunk_message(wizard_msg))
 
                     await reply.add_reaction(self.file["no_react"])
                     await reply.add_reaction(self.file["yes_react"])
