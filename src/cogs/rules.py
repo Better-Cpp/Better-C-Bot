@@ -1,7 +1,7 @@
-import io
 import json
 import re
 import time
+import traceback
 
 from discord.ext import commands
 import discord
@@ -144,19 +144,25 @@ class RulesEnforcer(commands.Cog, name="Rules"):
 
                     if reaction.emoji == self.file["yes_react"]:
                         bot_count = sum(1 for x in self._recent_joins if x['assumed_bot'])
-                        ban_start_msg = await reply.reply(f"Banning {bot_count} user[s]")
+                        ban_start_msg = await reply.reply(f"Banning {bot_count} user(s)")
 
-                        try:
-                            for user in self._recent_joins:
-                                if user["assumed_bot"]:
-                                    await member.guild.ban(
-                                        self.bot.get_user(user["id"]) if self.bot.get_user(user["id"])
-                                            else await self.bot.fetch_user(user["id"]))
-                        except:
-                            await ban_start_msg.reply("Banning failed")
+                        for user in self._recent_joins:
+                            if not user["assumed_bot"]:
+                                continue
 
-                        else:
-                            await ban_start_msg.reply("Banned the bots")
+                            failed_bans = []
+                            try:
+                                await member.guild.ban(discord.Object(id=user["id"]))
+
+                            except:
+                                failed_bans.append(user["id"])
+                                await ban_start_msg.reply("Banning failed with the following exception:\n"
+                                    + f"```py\n{traceback.format_exc()}\n```")
+
+                            await self._reply_chunks(
+                                    ban_start_msg,
+                                    self._chunk_message("Banned all bots except:\n"
+                                        + ",\n".join(map(lambda x: f"<@{x}>", failed_bans))))
 
                     await reply.clear_reactions()
 
@@ -165,7 +171,6 @@ class RulesEnforcer(commands.Cog, name="Rules"):
             finally:
                 self._recent_joins.clear()
                 self.massjoin_active = False
-
 
     @commands.command()
     @commands.has_role(file["staff_role"])
