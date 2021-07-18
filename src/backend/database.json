@@ -8,6 +8,8 @@
     "massjoin_min_acc_age": true,
     "massjoin_min_acc_age_val": 604800,
     "max_msg_size": 2000,
+    "no_react": "❎",
+    "yes_react": "✅",
     "permitted": [
         553478921870508061
     ],
