@@ -50,7 +50,7 @@ class RulesEnforcer(commands.Cog, name="Rules"):
 
         channel = guild.system_channel
         if channel:
-            return await channel.send(f"<@{role}> {message}")
+            return await channel.send(f"<@&{role}> {message}")
 
     def _chunk_message(self, msg):
         messages = []
@@ -146,11 +146,11 @@ class RulesEnforcer(commands.Cog, name="Rules"):
                         bot_count = sum(1 for x in self._recent_joins if x['assumed_bot'])
                         ban_start_msg = await reply.reply(f"Banning {bot_count} user(s)")
 
+                        failed_bans = []
                         for user in self._recent_joins:
                             if not user["assumed_bot"]:
                                 continue
 
-                            failed_bans = []
                             try:
                                 await member.guild.ban(discord.Object(id=user["id"]))
 
@@ -159,10 +159,10 @@ class RulesEnforcer(commands.Cog, name="Rules"):
                                 await ban_start_msg.reply("Banning failed with the following exception:\n"
                                     + f"```py\n{traceback.format_exc()}\n```")
 
-                            await self._reply_chunks(
-                                    ban_start_msg,
-                                    self._chunk_message("Banned all bots except:\n"
-                                        + ",\n".join(map(lambda x: f"<@{x}>", failed_bans))))
+                        await self._reply_chunks(
+                            ban_start_msg,
+                            self._chunk_message("Banned all bots except:\n"
+                                + ",\n".join(map(lambda x: f"<@{x}>", failed_bans))))
 
                     await reply.clear_reactions()
 
