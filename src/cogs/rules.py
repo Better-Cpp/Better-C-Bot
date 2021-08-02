@@ -14,7 +14,7 @@ class RulesEnforcer(commands.Cog, name="Rules"):
     def __init__(self, bot):
         self.bot = bot
 
-        # Maps channel : discord.Message
+        # Maps channel : list of deleted messages
         self._deleted = {}
 
         self._recent_joins = []
@@ -35,11 +35,18 @@ class RulesEnforcer(commands.Cog, name="Rules"):
             await ctx.send(f"**Rule {number}**:\n{self._rules[number]}")
 
     @commands.command()
-    async def snipe(self, ctx):
+    async def snipe(self, ctx, number = None):
         if ctx.channel not in self._deleted:
             return await ctx.send("No message to snipe.")
 
-        message: discord.Message = self._deleted[ctx.channel]
+        messages = self._deleted[ctx.channel]
+        index = abs(int(number)) if number else 0
+
+        if index >= len(messages):
+            return await ctx.send(f"The bot currently has only {len(messages)} deleted messages stored "
+                + "with index 0 being the most recently deleted message")
+
+        message = self._deleted[ctx.channel][len(messages) - 1 - index]
         user = str(message.author)
         ts = message.created_at.isoformat(" ")
         content = message.content
@@ -183,7 +190,14 @@ class RulesEnforcer(commands.Cog, name="Rules"):
 
     @commands.Cog.listener()
     async def on_message_delete(self, message):
-        self._deleted[message.channel] = message
+        channel = message.channel
+
+        if channel not in self._deleted:
+            self._deleted[channel] = [message]
+            return
+
+        self._deleted[channel] = self._deleted[channel][-self.file["max_del_msgs"]:]
+        self._deleted[channel].append(message)
 
     async def _update_rules(self):
         channel = self.bot.get_channel(self.file["rules_channel"])
