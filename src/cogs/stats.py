@@ -71,6 +71,11 @@ class Statistics(commands.Cog):
 
     @commands.Cog.listener()
     async def on_message(self, msg):
+        # bumping:
+        # This ID is the bump bot
+        if msg.author.id == 302050872383242240 and 'Bump done' in msg.embeds[0].description:
+            await asyncio.sleep(2 * 3600 + 60)
+            await msg.reply('<@&873897990958481448> Bump!')
         self.message_count += 1
 
     @commands.Cog.listener()
