@@ -3,7 +3,7 @@
     "massjoin_window": 30,
     "massjoin_amount": 5,
     "massjoin_notif_timeout": 900,
-    "massjoin_wizard_timeout": 120,
+    "massjoin_wizard_timeout": 300,
     "massjoin_default_pfp": true,
     "massjoin_min_acc_age": true,
     "massjoin_min_acc_age_val": 604800,
@@ -18,5 +18,9 @@
     "dupe_thresh": 0.8,
     "dupe_enabled": true,
     "spam_thresh": 5,
-    "spam_enabled": true
+    "spam_enabled": true,
+
+    "bump_bot_id": 302050872383242240,
+    "bump_bot_content": "Bump done",
+    "bumper_role_id": 873897990958481448
 }

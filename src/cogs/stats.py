@@ -1,3 +1,4 @@
+import json
 import asyncio
 from discord.ext import commands, tasks
 
@@ -14,6 +15,9 @@ class Statistics(commands.Cog):
         self.bot = bot
         self.reset_stats()
         self.post_statistics.start()
+
+        with open("src/backend/database.json", 'r') as f:  # Seems to be unavoidable
+            self.file = json.load(f)
 
     def reset_stats(self):
         self.joined_count = 0
@@ -73,9 +77,9 @@ class Statistics(commands.Cog):
     async def on_message(self, msg):
         # bumping:
         # This ID is the bump bot
-        if msg.author.id == 302050872383242240 and 'Bump done' in msg.embeds[0].description:
+        if msg.author.id == self.file['bump_bot_id'] and self.file['bump_bot_content'] in msg.embeds[0].description:
             await asyncio.sleep(2 * 3600 + 60)
-            await msg.reply('<@&873897990958481448> Bump!')
+            await msg.reply(f'<@&{self.file["bumper_role_id"]}> Bump!')
         self.message_count += 1
 
     @commands.Cog.listener()

@@ -15,7 +15,7 @@ class AutoMod(commands.Cog):
         self.badwords = set()
         self.read_words()
 
-        with open("src/backend/database.json") as file:
+        with open("src/backend/database.json", 'r') as file:
             self.file = json.load(file)
 
     def read_words(self):
