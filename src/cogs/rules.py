@@ -1,4 +1,3 @@
-import json
 import re
 import time
 import traceback
@@ -6,11 +5,9 @@ import traceback
 from discord.ext import commands
 import discord
 
+from src import config as conf
 
 class RulesEnforcer(commands.Cog, name="Rules"):
-    with open("src/backend/database.json", 'r') as f:
-        file = json.load(f)
-
     def __init__(self, bot):
         self.bot = bot
 
@@ -22,8 +19,6 @@ class RulesEnforcer(commands.Cog, name="Rules"):
         self.massjoin_detect = True
         self.massjoin_active = False
 
-        with open("src/backend/database.json", 'r') as f: # Seems to be unavoidable
-            self.file = json.load(f)
         bot.loop.create_task(self._update_rules())
 
     @commands.command()
@@ -53,7 +48,7 @@ class RulesEnforcer(commands.Cog, name="Rules"):
         return await ctx.send(f"**{discord.utils.escape_markdown(discord.utils.escape_mentions(user))}** said on {ts} UTC:\n{content}")
 
     async def _notify_staff(self, guild, message):
-        role = self.file["staff_role"]
+        role = conf.staff_role
 
         channel = guild.system_channel
         if channel:
@@ -61,12 +56,12 @@ class RulesEnforcer(commands.Cog, name="Rules"):
 
     def _chunk_message(self, msg):
         messages = []
-        while len(msg) > self.file["max_msg_size"]:
-            chunk = msg[:self.file["max_msg_size"]]
+        while len(msg) > conf.max_msg_size:
+            chunk = msg[:conf.max_msg_size]
 
             end_index = chunk.rfind('\n')
             if end_index == -1:
-                end_index = self.file["max_msg_size"]
+                end_index = conf.max_msg_size
 
             messages.append(chunk[:end_index])
             msg = msg[end_index + 1:]
@@ -90,13 +85,13 @@ class RulesEnforcer(commands.Cog, name="Rules"):
         if not self.massjoin_active:
             self._recent_joins = [
                 x for x in self._recent_joins
-                if current_time - x["join_time"] <= self.file["massjoin_window"]
+                if current_time - x["join_time"] <= conf.massjoin_window
             ]
 
-        is_bot_pfp = member.default_avatar_url == member.avatar_url if self.file["massjoin_default_pfp"] else True
+        is_bot_pfp = member.default_avatar_url == member.avatar_url if conf.massjoin_default_pfp else True
 
-        is_bot_age = ( current_time - member.created_at.timestamp() < self.file["massjoin_min_acc_age_val"]
-                if self.file["massjoin_min_acc_age"] else True )
+        is_bot_age = ( current_time - member.created_at.timestamp() < conf.massjoin_min_acc_age_val
+                if conf.massjoin_min_acc_age else True )
 
         self._recent_joins.append({
             "join_time": current_time,
@@ -107,30 +102,30 @@ class RulesEnforcer(commands.Cog, name="Rules"):
 
         join_amount = len(self._recent_joins)
 
-        if join_amount >= self.file["massjoin_amount"] and not self.massjoin_active:
+        if join_amount >= conf.massjoin_amount and not self.massjoin_active:
             try:
                 self.massjoin_active = True
 
                 msg = await self._notify_staff(member.guild,
-                    f"Mass member join detected. React with {self.file['yes_react']} to take action "
-                    + f"or with {self.file['no_react']} to ignore")
+                    f"Mass member join detected. React with {conf.yes_react} to take action "
+                    + f"or with {conf.no_react} to ignore")
 
-                await msg.add_reaction(self.file["no_react"])
-                await msg.add_reaction(self.file["yes_react"])
+                await msg.add_reaction(conf.no_react)
+                await msg.add_reaction(conf.yes_react)
 
                 def _check(reaction, user, reaction_msg):
                     return ( reaction.message.id == reaction_msg.id
-                        and any(role.id == self.file["staff_role"] for role in user.roles)
+                        and any(role.id == conf.staff_role for role in user.roles)
                         and user.id != self.bot.user.id )
 
                 reaction, user = await self.bot.wait_for('reaction_add',
                     check=lambda reaction, user: _check(reaction, user, msg),
-                    timeout=self.file["massjoin_notif_timeout"])
+                    timeout=conf.massjoin_notif_timeout)
 
-                if reaction.emoji == self.file["no_react"]:
+                if reaction.emoji == conf.no_react:
                     await msg.reply("Not taking any action and resetting the join detection")
 
-                if reaction.emoji == self.file["yes_react"]:
+                if reaction.emoji == conf.yes_react:
                     wizard_msg = ( "Users assumed to be bots:\n" + ",\n".join(map(lambda x: f"<@{x['id']}>",
                         filter(lambda x: x["assumed_bot"], self._recent_joins)))
                         + "\nUsers assumed to not be bots:\n" + ",\n".join(map(lambda x: f"<@{x['id']}>",
@@ -139,17 +134,17 @@ class RulesEnforcer(commands.Cog, name="Rules"):
 
                     reply = await self._reply_chunks(msg, self._chunk_message(wizard_msg))
 
-                    await reply.add_reaction(self.file["no_react"])
-                    await reply.add_reaction(self.file["yes_react"])
+                    await reply.add_reaction(conf.no_react)
+                    await reply.add_reaction(conf.yes_react)
 
                     reaction, user = await self.bot.wait_for('reaction_add',
                         check=lambda reaction, user: _check(reaction, user, reply),
-                        timeout=self.file["massjoin_wizard_timeout"])
+                        timeout=conf.massjoin_wizard_timeout)
 
-                    if reaction.emoji == self.file["no_react"]:
+                    if reaction.emoji == conf.no_react:
                         await reply.reply("Not banning any users and resetting the join detection")
 
-                    if reaction.emoji == self.file["yes_react"]:
+                    if reaction.emoji == conf.yes_react:
                         bot_count = sum(1 for x in self._recent_joins if x['assumed_bot'])
                         ban_start_msg = await reply.reply(f"Banning {bot_count} user(s)")
 
@@ -180,7 +175,7 @@ class RulesEnforcer(commands.Cog, name="Rules"):
                 self.massjoin_active = False
 
     @commands.command()
-    @commands.has_role(file["staff_role"])
+    @commands.has_role(conf.staff_role)
     async def toggle_massjoin_detection(self, ctx):
         self.massjoin_detect = not self.massjoin_detect
         if self.massjoin_detect:
@@ -196,11 +191,11 @@ class RulesEnforcer(commands.Cog, name="Rules"):
             self._deleted[channel] = [message]
             return
 
-        self._deleted[channel] = self._deleted[channel][-self.file["max_del_msgs"]:]
+        self._deleted[channel] = self._deleted[channel][-conf.max_del_msgs:]
         self._deleted[channel].append(message)
 
     async def _update_rules(self):
-        channel = self.bot.get_channel(self.file["rules_channel"])
+        channel = self.bot.get_channel(conf.rules_channel)
         messages = await channel.history(limit=1000000, oldest_first=True).flatten()
         self._rules = {}
 
@@ -219,10 +214,11 @@ class RulesEnforcer(commands.Cog, name="Rules"):
                     self._rules[number] = text
 
     @commands.command(hidden=True)
-    @commands.has_role(file["staff_role"])
+    @commands.has_role(conf.staff_role)
     async def update_rules(self, ctx):
         await self._update_rules()
         await ctx.send("The rules were updated successully")
+
 def setup(bot):
     bot.add_cog(RulesEnforcer(bot))
 

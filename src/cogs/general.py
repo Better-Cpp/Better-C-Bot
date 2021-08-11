@@ -1,6 +1,5 @@
 import io
 import urllib.parse
-# import json
 
 from discord.ext import commands
 import discord

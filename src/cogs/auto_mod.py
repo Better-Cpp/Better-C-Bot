@@ -1,26 +1,20 @@
 from difflib import SequenceMatcher
-import json
 
 from discord.ext import commands
 import discord
 
+from src import config as conf
 
 class AutoMod(commands.Cog):
     """
     Automatic moderation
     """
-    with open("src/backend/database.json", 'r') as f:
-        file = json.load(f)
-
     def __init__(self, bot):
         self.bot = bot
         self.duplicate_msg_detect = True
 
         self.badwords = set()
         self.read_words()
-
-        with open("src/backend/database.json", 'r') as file:
-            self.file = json.load(file)
 
     def read_words(self):
         with open("badwords.txt") as file:
@@ -65,7 +59,7 @@ class AutoMod(commands.Cog):
 
                 if (
                     SequenceMatcher(None, message.content, candidate.content).ratio()
-                    > self.file["dupe_thresh"]
+                    > conf.dupe_thresh
                 ):
                     # if the message was a command, we can just ignore it
                     ctx = await self.bot.get_context(candidate)
@@ -100,7 +94,7 @@ class AutoMod(commands.Cog):
 
     @commands.group(aliases=["duplication"])
     @commands.guild_only()
-    @commands.has_role(file["staff_role"])
+    @commands.has_role(conf.staff_role)
     async def duplicate(self, ctx):
         """
         Duplication detection options
