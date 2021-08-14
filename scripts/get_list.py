@@ -235,15 +235,13 @@ def get_header_contents(header):
     return ret
 
 
-def get_class_members(class_name):
+def get_class_members(header_name, class_name):
     ret = [""]
-    with open("scripts/cpp/headers.json", "r") as file:
-        classes_with_headers = json.load(file)
-
-    header_name = ""
-    for key, value in classes_with_headers.items():
-        if class_name in value:
-            header_name = key
+    # I give up
+    if header_name == "typeinfo" or header_name == "typeindex":
+        header_name = "types"
+    if class_name == "dynamic_cast":
+        header_name = "language"
 
     with open(f"src/cppref/cpp/{header_name}/{class_name}.html", "r") as file:
         soup = BeautifulSoup(file, "html.parser")
@@ -284,28 +282,28 @@ def get_class_members(class_name):
 
 def get_cpp_indexes():
     # Get the namespaces and their members
-    print("Dumping namespaces...")
-    with open("src/cppref/cpp/symbol_index.html", "r") as file:
-        std_index = BeautifulSoup(file, "html.parser")
+    # print("Dumping namespaces...")
+    # with open("src/cppref/cpp/symbol_index.html", "r") as file:
+    #     std_index = BeautifulSoup(file, "html.parser")
 
-    namespace_list = std_index.find(attrs={"class": "t-nv-begin"}).find_all(
-        attrs={"class": "t-nv"}
-    )
+    # namespace_list = std_index.find(attrs={"class": "t-nv-begin"}).find_all(
+    #     attrs={"class": "t-nv"}
+    # )
 
-    namespaces = {}
-    for i in namespace_list:
-        space_name = i.text.replace("std::", "").split("(")[0]
-        namespaces[space_name] = get_namespace_members(space_name)
+    # namespaces = {}
+    # for i in namespace_list:
+    #     space_name = i.text.replace("std::", "").split("(")[0]
+    #     namespaces[space_name] = get_namespace_members(space_name)
 
-    print("Done.")
-    with open("scripts/cpp/namespaces.json", "w+") as file:
-        json.dump(namespaces, file, indent=4)
+    # print("Done.")
+    # with open("scripts/cpp/namespaces.json", "w+") as file:
+    #     json.dump(namespaces, file, indent=4)
 
-    # Get the aliases
-    print("Dumping aliases")
-    with open("scripts/cpp/aliases.json", "w+") as file:
-        json.dump(get_aliases(), file, indent=4)
-    print("Done.")
+    # # Get the aliases
+    # print("Dumping aliases")
+    # with open("scripts/cpp/aliases.json", "w+") as file:
+    #     json.dump(get_aliases(), file, indent=4)
+    # print("Done.")
 
     # Get all the headers
     print("Dumping headers and their contents...")
@@ -327,11 +325,13 @@ def get_cpp_indexes():
         class_names[i] = x["classes"]
 
     classes = {}
-    for i in class_names:
-        classes[i] = get_class_members(i)
+    # We don't talk about classs
+    for header, classes_list in class_names.items():
+        for classs in classes_list:
+            classes[i] = get_class_members(header, classs)
 
     with open("scripts/cpp/classes.json", "w+") as file:
-        json.dump(classes)
+        json.dump(classes, file, indent=4)
     print("Done.")
 
 
@@ -394,10 +394,5 @@ def get_c_index():
         json.dump(ret, file, indent=4)
 
 
-# get_aliases()
-# get_namespaces_and_members()
-# get_language_concepts("cpp")
-# get_headers_and_contents("cpp")
-# print(get_header_contents("cpp", "complex")["classes"])
-print(list(get_class_members("string")))
+get_cpp_indexes()
 # get_c_index()
