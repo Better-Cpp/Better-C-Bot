@@ -1,22 +1,20 @@
-import json
 
 from discord.ext import commands
 from fuzzywuzzy import fuzz, process
 import discord
 
+from src import config as conf
 
 class AutoMod(commands.Cog):
     """
     Automatic moderation
     """
-
     def __init__(self, bot):
         self.bot = bot
+        self.duplicate_msg_detect = True
+
         self.badwords = set()
         self.read_words()
-
-        with open("src/backend/database.json") as file:
-            self.file = json.load(file)
 
     def read_words(self):
         with open("badwords.txt") as file:
@@ -60,8 +58,8 @@ class AutoMod(commands.Cog):
                     return True, candidate
 
                 if (
-                    fuzz.ratio(message.clean_content, candidate.clean_content)
-                    > self.file["dupe_thresh"]
+                    fuzz.ratio(None, message.content, candidate.content)
+                    > conf.dupe_thresh
                 ):
                     # if the message was a command, we can just ignore it
                     ctx = await self.bot.get_context(candidate)
@@ -94,95 +92,32 @@ class AutoMod(commands.Cog):
                 + f"Percent Match: {fuzz.ratio(duplicate_message.clean_content, msg.clean_content)}"
             )
 
-    @commands.group(hidden=True, aliases=["duplication"])
+    @commands.group(aliases=["duplication"])
     @commands.guild_only()
+    @commands.has_role(conf.staff_role)
     async def duplicate(self, ctx):
         """
         Duplication detection options
         """
-        if ctx.message.author.id not in self.file["permitted"]:
-            return await ctx.send("You do not have authorization to use this command")
-
         if ctx.invoked_subcommand is None:
-            dupe_enabled = "enabled" if self.file["dupe_enabled"] else "disabled"
+            dupe_enabled = "enabled" if self.duplicate_msg_detect else "disabled"
 
             e = discord.Embed(
                 title=f"Duplicate message detection",
                 description="__Options:__"
-                + f"►\n**thresh**\n- Current threshold: **{self.file['dupe_thresh']}**\n"
                 + f"►\n**toggle**\n- Currently **{dupe_enabled}**",
             )
             return await ctx.send(embed=e)
 
-    @duplicate.command(hidden=True)
-    async def thresh(self, ctx, new_thresh):
-        """
-        Change the threshold for the duplication detection. Default is 0.8
-        """
-        self.file["dupe_thresh"] = new_thresh
-        with open("src/backend/database.json", "w+") as file:
-            json.dump(self.file, file)
-
-        await ctx.reply(f"The new duplication match threshold is {new_thresh}")
-
-    @duplicate.command(hidden=True)
+    @duplicate.command()
     async def toggle(self, ctx):
         """
         Toggle the duplication detection. On by default
         """
-        self.file["dupe_enabled"] = not self.file["dupe_enabled"]
+        self.duplicate_msg_detect = not self.duplicate_msg_detect
 
-        with open("src/backend/database.json", "w+") as file:
-            json.dump(self.file, file, indent=4)
-
-        new_enabled = "enabled" if self.file["dupe_enabled"] else "disabled"
+        new_enabled = "enabled" if self.duplicate_msg_detect else "disabled"
         await ctx.reply(f"Duplicated message detection is now {new_enabled}")
-
-    # Commented out because I will do spam detection later
-    # @commands.group(hidden=True, aliases=["duplication"])
-    # @commands.guild_only()
-    # async def spam(self, ctx):
-    #     """
-    #     Duplication detection options
-    #     """
-    #     if ctx.message.author.id not in self.file["permitted"]:
-    #         return await ctx.send("You do not have authorization to use this command")
-    #
-    #     if ctx.invoked_subcommand is None:
-    #         spam_enabled = "enabled" if self.file["spam_enabled"] else "disabled"
-    #
-    #         e = discord.Embed(
-    #             title=f"Spam message detection",
-    #             description="__Options:__"
-    #             + f"►\n**thresh**\n- Current threshold: **{self.file['spam_thresh']}**\n"
-    #             + f"►\n**toggle**\n- Currently **{spam_enabled}**",
-    #         )
-    #         return await ctx.send(embed=e)
-
-    # @spam.command(hidden=True)
-    # async def thresh(self, ctx, new_thresh):
-    #     """
-    #     Change the threshold for the spam detection. Default is 5
-    #     """
-    #     self.file["spam_thresh"] = new_thresh
-    #     with open("src/backend/database.json", "w+") as file:
-    #         json.dump(self.file, file)
-
-    #     await ctx.reply(f"The new spam match threshold is {new_thresh}")
-
-    # @spam.command(hidden=True)
-    # async def toggle(self, ctx):
-    #     """
-    #     Toggle the spam detection. On by default
-    #     """
-    #     self.file["spam_enabled"] = not self.file["spam_enabled"]
-
-    #     with open("src/backend/database.json", "w+") as file:
-    #         json.dump(self.file, file, indent=4)
-
-    #     new_enabled = "enabled" if self.file["spam_enabled"] else "disabled"
-    #     await ctx.reply(f"Spam message detection is now {new_enabled}")
-
 
 def setup(bot):
     bot.add_cog(AutoMod(bot))

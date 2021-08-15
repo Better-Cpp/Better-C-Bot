@@ -1,5 +1,4 @@
 import io
-import json
 import textwrap
 import traceback
 from contextlib import redirect_stdout
@@ -7,14 +6,12 @@ from contextlib import redirect_stdout
 from discord.ext import commands
 import discord
 
+from src import config as conf
 
 class Administration(commands.Cog, name="Administration"):
     def __init__(self, bot):
         self.bot = bot
         self._last_result = None
-
-        with open("src/backend/database.json", "r") as file:
-            self.file = json.load(file)
 
     def cleanup_code(self, content):
         """Automatically removes code blocks from the code."""
@@ -37,7 +34,7 @@ class Administration(commands.Cog, name="Administration"):
         """
         ReLoads all cogs.
         """
-        if ctx.message.author.id not in self.file["permitted"]:
+        if ctx.message.author.id not in conf.permitted:
             return await ctx.send("You do not have authorization to use this command")
 
         for cog in self.bot.user_cogs:
@@ -52,7 +49,7 @@ class Administration(commands.Cog, name="Administration"):
         """
         Evaluates some code
         """
-        if ctx.message.author.id not in self.file["permitted"]:
+        if ctx.message.author.id not in conf.permitted:
             return await ctx.send("You do not have authorization to use this command")
 
         env = {

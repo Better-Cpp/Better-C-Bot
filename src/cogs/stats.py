@@ -3,6 +3,7 @@ from discord.ext import commands, tasks
 
 import datetime
 
+from src import config as conf
 
 class Statistics(commands.Cog):
     """
@@ -71,6 +72,11 @@ class Statistics(commands.Cog):
 
     @commands.Cog.listener()
     async def on_message(self, msg):
+        # bumping:
+        # This ID is the bump bot
+        if msg.author.id == conf.bump_bot_id and conf.bump_bot_content in msg.embeds[0].description:
+            await asyncio.sleep(2 * 3600 + 60)
+            await msg.reply(f'<@&{conf.bumper_role_id}> Bump!')
         self.message_count += 1
 
     @commands.Cog.listener()
