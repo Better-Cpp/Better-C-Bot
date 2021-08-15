@@ -21,4 +21,5 @@ COPY --chown=bettercbot:bettercbot src/cogs/ src/cogs
 COPY --chown=bettercbot:bettercbot src/backend src/backend
 COPY --chown=bettercbot:bettercbot src/config.py src/config.py
 
+
 CMD ["python3", "-m", "src"]

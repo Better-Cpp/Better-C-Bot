@@ -1,6 +1,6 @@
-from difflib import SequenceMatcher
 
 from discord.ext import commands
+from fuzzywuzzy import fuzz, process
 import discord
 
 from src import config as conf
@@ -58,7 +58,7 @@ class AutoMod(commands.Cog):
                     return True, candidate
 
                 if (
-                    SequenceMatcher(None, message.content, candidate.content).ratio()
+                    fuzz.ratio(None, message.content, candidate.content)
                     > conf.dupe_thresh
                 ):
                     # if the message was a command, we can just ignore it
@@ -89,7 +89,7 @@ class AutoMod(commands.Cog):
             return await msg.reply(
                 "Please only post in one channel. Thanks!\n"
                 + f"Flagged message: {duplicate_message.jump_url}\n"
-                + f"Flagged content: ```\n{duplicate_message.clean_content}```"
+                + f"Percent Match: {fuzz.ratio(duplicate_message.clean_content, msg.clean_content)}"
             )
 
     @commands.group(aliases=["duplication"])
