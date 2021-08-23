@@ -43,9 +43,10 @@ class RulesEnforcer(commands.Cog, name="Rules"):
 
         message = self._deleted[ctx.channel][len(messages) - 1 - index]
         user = str(message.author)
-        ts = message.created_at.isoformat(" ")
+        ts = message.created_at.isoformat(" ", "seconds")
         content = message.content
-        return await ctx.send(f"**{discord.utils.escape_markdown(discord.utils.escape_mentions(user))}** said on {ts} UTC:\n{content}")
+        return await ctx.send(f"**{discord.utils.escape_markdown(discord.utils.escape_mentions(user))}** said on {ts} UTC:\n"
+                + f"{discord.utils.escape_mentions(content)}")
 
     async def _notify_staff(self, guild, message):
         role = conf.staff_role
@@ -191,8 +192,8 @@ class RulesEnforcer(commands.Cog, name="Rules"):
             self._deleted[channel] = [message]
             return
 
-        self._deleted[channel] = self._deleted[channel][-conf.max_del_msgs:]
         self._deleted[channel].append(message)
+        self._deleted[channel] = self._deleted[channel][-conf.max_del_msgs:]
 
     async def _update_rules(self):
         channel = self.bot.get_channel(conf.rules_channel)
