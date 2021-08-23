@@ -191,8 +191,8 @@ class RulesEnforcer(commands.Cog, name="Rules"):
             self._deleted[channel] = [message]
             return
 
-        self._deleted[channel] = self._deleted[channel][-conf.max_del_msgs:]
         self._deleted[channel].append(message)
+        self._deleted[channel] = self._deleted[channel][-conf.max_del_msgs:]
 
     async def _update_rules(self):
         channel = self.bot.get_channel(conf.rules_channel)
