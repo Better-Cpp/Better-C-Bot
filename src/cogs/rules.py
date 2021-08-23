@@ -45,7 +45,8 @@ class RulesEnforcer(commands.Cog, name="Rules"):
         user = str(message.author)
         ts = message.created_at.isoformat(" ")
         content = message.content
-        return await ctx.send(f"**{discord.utils.escape_markdown(discord.utils.escape_mentions(user))}** said on {ts} UTC:\n{content}")
+        return await ctx.send(f"**{discord.utils.escape_markdown(discord.utils.escape_mentions(user))}** said on {ts} UTC:\n"
+                + f"{discord.utils.escape_mentions(content)}")
 
     async def _notify_staff(self, guild, message):
         role = conf.staff_role
