@@ -43,7 +43,7 @@ class RulesEnforcer(commands.Cog, name="Rules"):
 
         message = self._deleted[ctx.channel][len(messages) - 1 - index]
         user = str(message.author)
-        ts = message.created_at.isoformat(" ")
+        ts = message.created_at.isoformat(" ", "seconds")
         content = message.content
         return await ctx.send(f"**{discord.utils.escape_markdown(discord.utils.escape_mentions(user))}** said on {ts} UTC:\n"
                 + f"{discord.utils.escape_mentions(content)}")
