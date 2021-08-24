@@ -65,6 +65,22 @@ class RulesEnforcer(commands.Cog, name="Rules"):
 
         return await self._reply_chunks(ctx.message, self._chunk_message(message))
 
+    @commands.command()
+    async def history(self, ctx):
+        if not ctx.message.reference:
+            return await ctx.send("No message is replied to")
+
+        if ctx.message.reference.message_id not in self._message_history:
+            return await ctx.send("Message either never edited or too old")
+
+        history = self._message_history[ctx.message.reference.message_id]
+
+        message = ""
+        for state in reversed(history):
+            message += self._change_msg(state, "edited")
+
+        return await self._reply_chunks(ctx.message, self._chunk_message(message))
+
     async def _notify_staff(self, guild, message):
         role = conf.staff_role
 
