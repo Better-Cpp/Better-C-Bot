@@ -29,3 +29,4 @@ rules_channel = 583301260006916099
 
 # Delted message sniping
 max_del_msgs = 10
+max_edit_msg_age = 86400
