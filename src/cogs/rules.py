@@ -1,18 +1,28 @@
 import re
 import time
 import traceback
+from datetime import datetime
+from dataclasses import dataclass
 
 from discord.ext import commands
 import discord
 
 from src import config as conf
 
+@dataclass
+class Entry:
+    time: float
+    msg: str
+
 class RulesEnforcer(commands.Cog, name="Rules"):
     def __init__(self, bot):
         self.bot = bot
 
-        # Maps channel : list of deleted messages
+        # Maps channel : list of history of deleted messages
         self._deleted = {}
+
+        # Maps message id : history of edited message
+        self._message_history = {}
 
         self._recent_joins = []
 
@@ -29,24 +39,47 @@ class RulesEnforcer(commands.Cog, name="Rules"):
         else:
             await ctx.send(f"**Rule {number}**:\n{self._rules[number]}")
 
+    def _change_msg(self, entry, status):
+        user = str(entry.msg.author)
+        ts = datetime.fromtimestamp(entry.time).isoformat(" ", "seconds")
+        content = entry.msg.clean_content
+        return f"**{discord.utils.escape_markdown(discord.utils.escape_mentions(user))}** {status} on {ts} UTC:\n{content}\n"
+
     @commands.command()
     async def snipe(self, ctx, number = None):
         if ctx.channel not in self._deleted:
             return await ctx.send("No message to snipe.")
 
-        messages = self._deleted[ctx.channel]
+        histories = self._deleted[ctx.channel]
         index = abs(int(number)) if number else 0
 
-        if index >= len(messages):
-            return await ctx.send(f"The bot currently has only {len(messages)} deleted messages stored "
+        if index >= len(histories):
+            return await ctx.send(f"The bot currently has only {len(histories)} deleted messages stored "
                 + "with index 0 being the most recently deleted message")
 
-        message = self._deleted[ctx.channel][len(messages) - 1 - index]
-        user = str(message.author)
-        ts = message.created_at.isoformat(" ", "seconds")
-        content = message.content
-        return await ctx.send(f"**{discord.utils.escape_markdown(discord.utils.escape_mentions(user))}** said on {ts} UTC:\n"
-                + f"{discord.utils.escape_mentions(content)}")
+        history = self._deleted[ctx.channel][-1 - index]
+        message = self._change_msg(history[-1], "deleted")
+
+        for state in reversed(history[:-1]):
+            message += self._change_msg(state, "edited")
+
+        return await self._reply_chunks(ctx.message, self._chunk_message(message))
+
+    @commands.command()
+    async def history(self, ctx):
+        if not ctx.message.reference:
+            return await ctx.send("No message is replied to")
+
+        if ctx.message.reference.message_id not in self._message_history:
+            return await ctx.send("Message either never edited or too old")
+
+        history = self._message_history[ctx.message.reference.message_id]
+
+        message = ""
+        for state in reversed(history):
+            message += self._change_msg(state, "edited")
+
+        return await self._reply_chunks(ctx.message, self._chunk_message(message))
 
     async def _notify_staff(self, guild, message):
         role = conf.staff_role
@@ -189,11 +222,29 @@ class RulesEnforcer(commands.Cog, name="Rules"):
         channel = message.channel
 
         if channel not in self._deleted:
-            self._deleted[channel] = [message]
-            return
+            self._deleted[channel] = []
 
-        self._deleted[channel].append(message)
+        if message.id not in self._message_history:
+            self._deleted[channel].append([Entry(time.time(), message)])
+        else:
+            self._message_history[message.id].append(Entry(time.time(), message))
+            self._deleted[channel].append(self._message_history[message.id])
+            self._message_history.pop(message.id)
+
         self._deleted[channel] = self._deleted[channel][-conf.max_del_msgs:]
+
+    @commands.Cog.listener()
+    async def on_message_edit(self, old, _):
+        if old.id not in self._message_history:
+            self._message_history[old.id] = []
+
+        self._message_history[old.id].append(Entry(time.time(), old))
+
+        now = time.time()
+        self._message_history = {
+                    k: v for k, v in self._message_history.items()
+                    if v[-1].time > now - conf.max_edit_msg_age
+                }
 
     async def _update_rules(self):
         channel = self.bot.get_channel(conf.rules_channel)
