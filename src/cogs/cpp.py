@@ -178,7 +178,7 @@ class cpp(commands.Cog, name="C++"):
             return
 
         # Convert inline code into code blocks, if any exist they will be formatted in the next part of the code.
-        processed = target_msg.content
+        processed = target_msg.clean_content
         inline_code_matches = list(_inline_code_regex.finditer(processed))
 
         for match in reversed(inline_code_matches):
