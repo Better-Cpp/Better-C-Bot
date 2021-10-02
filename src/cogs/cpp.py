@@ -10,7 +10,9 @@ import contextlib
 _code_block_regex = re.compile(r"\s*```(?:\S*?\n)?([\s\S]+?)```\s*", re.I)
 _inline_code_regex = re.compile(r"(?<!`)(``?)(?!`)([\s\S]+?)(?<!`)\1(?!`)")
 
-def _clang_format(code, style: str = None):
+def _clang_format(code, style: str = ""):
+    style = style.lower()
+
     valid_styles = ["llvm", "gnu", "google", "chromium", "microsoft", "mozilla", "webkit"]
 
     command = ["/usr/bin/clang-format"]
