@@ -163,8 +163,9 @@ class cpp(commands.Cog, name="C++"):
             return await ctx.send("Failed to find lectures role")
         await ctx.author.add_roles(role)
         await ctx.send("Gave you the role!")
+
     @commands.command(aliases=["f"])
-    async def format(self, ctx: commands.Context, style = None):
+    async def format(self, ctx: commands.Context, style = ""):
         """Format C or C++ code in the message you are replying to.
         Available styles: `LLVM`, `GNU`, `Google`, `Chromium`, `Microsoft`, `Mozilla`, `WebKit`"""
 
