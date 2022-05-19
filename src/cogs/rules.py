@@ -7,12 +7,15 @@ from dataclasses import dataclass
 from discord.ext import commands
 import discord
 
+from src.blacklist import blacklist
 from src import config as conf
+
 
 @dataclass
 class Entry:
     time: float
     msg: str
+
 
 class RulesEnforcer(commands.Cog, name="Rules"):
     def __init__(self, bot):
@@ -46,7 +49,7 @@ class RulesEnforcer(commands.Cog, name="Rules"):
         return f"**{discord.utils.escape_markdown(discord.utils.escape_mentions(user))}** {status} on {ts} UTC:\n{content}\n"
 
     @commands.command()
-    async def snipe(self, ctx, number = None):
+    async def snipe(self, ctx, number=None):
         if ctx.channel not in self._deleted:
             return await ctx.send("No message to snipe.")
 
@@ -55,9 +58,14 @@ class RulesEnforcer(commands.Cog, name="Rules"):
 
         if index >= len(histories):
             return await ctx.send(f"The bot currently has only {len(histories)} deleted messages stored "
-                + "with index 0 being the most recently deleted message")
+                                  + "with index 0 being the most recently deleted message")
 
         history = self._deleted[ctx.channel][-1 - index]
+        message = history[-1]
+
+        if message.msg.clean_content.lower() in blacklist:
+            return await ctx.message.reply("The requested deleted message contained a word that we do not allow, sorry!")
+
         message = self._change_msg(history[-1], "deleted")
 
         for state in reversed(history[:-1]):
@@ -141,8 +149,8 @@ class RulesEnforcer(commands.Cog, name="Rules"):
                 self.massjoin_active = True
 
                 msg = await self._notify_staff(member.guild,
-                    f"Mass member join detected. React with {conf.yes_react} to take action "
-                    + f"or with {conf.no_react} to ignore")
+                                               f"Mass member join detected. React with {conf.yes_react} to take action "
+                                               + f"or with {conf.no_react} to ignore")
 
                 await msg.add_reaction(conf.no_react)
                 await msg.add_reaction(conf.yes_react)
@@ -193,12 +201,12 @@ class RulesEnforcer(commands.Cog, name="Rules"):
                             except:
                                 failed_bans.append(user["id"])
                                 await ban_start_msg.reply("Banning failed with the following exception:\n"
-                                    + f"```py\n{traceback.format_exc()}\n```")
+                                                          + f"```py\n{traceback.format_exc()}\n```")
 
                         await self._reply_chunks(
                             ban_start_msg,
                             self._chunk_message("Banned all bots except:\n"
-                                + ",\n".join(map(lambda x: f"<@{x}>", failed_bans))))
+                                                + ",\n".join(map(lambda x: f"<@{x}>", failed_bans))))
 
                     await reply.clear_reactions()
 
@@ -242,9 +250,9 @@ class RulesEnforcer(commands.Cog, name="Rules"):
 
         now = time.time()
         self._message_history = {
-                    k: v for k, v in self._message_history.items()
-                    if v[-1].time > now - conf.max_edit_msg_age
-                }
+            k: v for k, v in self._message_history.items()
+            if v[-1].time > now - conf.max_edit_msg_age
+        }
 
     async def _update_rules(self):
         channel = self.bot.get_channel(conf.rules_channel)
@@ -273,4 +281,3 @@ class RulesEnforcer(commands.Cog, name="Rules"):
 
 def setup(bot):
     bot.add_cog(RulesEnforcer(bot))
-
