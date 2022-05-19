@@ -2,7 +2,9 @@ class blacklist_meta(type):
     # allow contains statically
     def __contains__(self, line):
         return blacklist.__contains__(line)
-
+    
+    def __and__(self, line):
+        return blacklist.__and__(line)
 
 class blacklist(metaclass=blacklist_meta):
     badwords = []
@@ -17,4 +19,13 @@ class blacklist(metaclass=blacklist_meta):
 
     @classmethod
     def __contains__(cls, line):
-        return any(word in cls.badwords for word in line.split())
+        return any(word in line 
+                   for word in cls.badwords)
+
+    @classmethod
+    def intersect(cls, line):
+        return [idx + 1
+                for idx, word in enumerate(cls.badwords) 
+                if word in line]
+    
+    __and__ = intersect

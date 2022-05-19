@@ -58,13 +58,15 @@ class RulesEnforcer(commands.Cog, name="Rules"):
 
         if index >= len(histories):
             return await ctx.send(f"The bot currently has only {len(histories)} deleted messages stored "
-                                  + "with index 0 being the most recently deleted message")
+                                   "with index 0 being the most recently deleted message")
 
         history = self._deleted[ctx.channel][-1 - index]
         message = history[-1]
-
-        if message.msg.clean_content.lower() in blacklist:
-            return await ctx.message.reply("The requested deleted message contained a word that we do not allow, sorry!")
+        
+        msg_content = message.msg.content.lower()
+        if msg_content in blacklist:
+            return await ctx.message.reply( "The requested deleted message contained a word that we do not allow, sorry! "
+                                           f"(offender {message.msg.author.mention}, reason {blacklist & msg_content})")
 
         message = self._change_msg(history[-1], "deleted")
 

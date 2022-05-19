@@ -73,7 +73,7 @@ class AutoMod(commands.Cog):
         if msg_content in blacklist:
             await msg.delete()
             return await msg.channel.send(
-                f"{msg.author.mention}, your message contained a word that we do not allow, sorry!"
+                f"{msg.author.mention}, your message contained a word that we do not allow, sorry! (reason {blacklist & msg_content})"
             )           
 
         is_impatient, duplicate_message = await self.is_duplicate(msg)
