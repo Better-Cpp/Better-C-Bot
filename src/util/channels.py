@@ -2,6 +2,7 @@ import discord
 import asyncio
 from datetime import datetime
 
+from src.util import permissions
 from src import config as conf
 
 
@@ -45,8 +46,10 @@ class channels:
         def __index__(self):
             return self.underlying.id
 
-        def is_privileged(self, user):
-            return self.owner == user or any(e.id == conf.staff_role for e in user.roles)
+        def is_privileged(self, user: discord.Member):
+            return self.owner == user or \
+                permissions.has_role(user, conf.helpful_role) or \
+                permissions.is_staff(user, self.underlying)
 
         async def move(self, cat, reason=None):
             await self.underlying.move(category=cat,

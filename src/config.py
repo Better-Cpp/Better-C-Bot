@@ -48,3 +48,4 @@ dormant_time = timedelta(seconds=10)
 
 # after how much time a dormant channel will be available again
 reset_time = timedelta(seconds=30)
+helpful_role = 977077468034920449

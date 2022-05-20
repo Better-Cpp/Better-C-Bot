@@ -36,7 +36,6 @@ class HelpChannels(commands.Cog):
 
         channel = self.channels[reaction.message.channel]
         if channel.is_privileged(user):
-            print("user is privieleged")
             if reaction.emoji == conf.no_react:
                 await channel.reactivate()
             if reaction.emoji == conf.yes_react:
