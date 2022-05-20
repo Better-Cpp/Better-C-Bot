@@ -3,7 +3,7 @@ from discord.ext import commands
 from fuzzywuzzy import fuzz, process
 import discord
 
-from src.blacklist import blacklist
+from src.util.blacklist import blacklist
 from src import config as conf
 
 class AutoMod(commands.Cog):

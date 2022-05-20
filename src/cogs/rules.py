@@ -7,7 +7,7 @@ from dataclasses import dataclass
 from discord.ext import commands
 import discord
 
-from src.blacklist import blacklist
+from src.util.blacklist import blacklist
 from src import config as conf
 
 
