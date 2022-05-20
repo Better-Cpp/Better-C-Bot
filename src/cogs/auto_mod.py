@@ -64,17 +64,30 @@ class AutoMod(commands.Cog):
         # To keep from getting errors
         return False, None
 
+    async def apply_filter(self, message):
+        msg_content = message.content.lower()
+        if msg_content in blacklist:
+            await message.delete()
+            await message.channel.send(
+                f"{message.author.mention}, your message contained a word that we do not allow, sorry! (reason {blacklist & msg_content})"
+            )
+            return True
+        return False
+    
+    @commands.Cog.listener()
+    async def on_message_edit(self, _, after):
+        if after.author.id == self.bot.user.id:
+            return
+        
+        await self.apply_filter(after)
+
     @commands.Cog.listener()
     async def on_message(self, msg):
         if msg.author.id == self.bot.user.id:
             return
         
-        msg_content = msg.content.lower()
-        if msg_content in blacklist:
-            await msg.delete()
-            return await msg.channel.send(
-                f"{msg.author.mention}, your message contained a word that we do not allow, sorry! (reason {blacklist & msg_content})"
-            )           
+        if await self.apply_filter(msg):
+            return
 
         is_impatient, duplicate_message = await self.is_duplicate(msg)
         if is_impatient:
