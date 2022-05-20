@@ -65,8 +65,11 @@ class channels:
             await self.move(category['occupied'])
 
         async def release(self, reason=None):
-            if self.message:
+            try:
                 await self.message.unpin()
+            except Exception as e:
+                print(e)
+                
             self.owner = None
             self.message = None
 
@@ -92,15 +95,18 @@ class channels:
             diff = datetime.utcnow() - last.created_at
 
             if self in category['dormant']:
-                print(f"Resetting in {diff}")
                 if diff > conf.reset_time:
                     await self.release()
 
             if self in category['occupied']:
                 if diff > conf.dormant_time:
+                    if not self.owner:
+                        await self.release()
+                        return
+                    
                     msg = await self.underlying.send(f"Channel became dormant. {self.owner.mention} "
-                                                     f"can react with {conf.yes_react} to reactivate it "
-                                                     f"or with {conf.no_react} to make this channel available again.")
+                                                     f"can react with {conf.no_react} to reactivate it "
+                                                     f"or with {conf.yes_react} to make this channel available again.")
                     await msg.add_reaction(conf.no_react)
                     await msg.add_reaction(conf.yes_react)
                     await self.move(category['dormant'])

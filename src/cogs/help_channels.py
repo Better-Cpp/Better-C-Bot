@@ -12,15 +12,18 @@ class HelpChannels(commands.Cog):
 
     @commands.Cog.listener()
     async def on_message(self, msg):
-        if msg.author.id == self.bot.user.id:
-            return
+        try:
+            if msg.author.id == self.bot.user.id:
+                return
 
-        if msg.channel not in category['available']:
-            return
+            if msg.channel not in category['available']:
+                return
 
-        channel = self.channels[msg.channel]
-        await channel.claim(msg)
-
+            channel = self.channels[msg.channel]
+            await channel.claim(msg)
+        except Exception as e:
+            print(e)
+            
     @commands.Cog.listener()
     async def on_reaction_add(self, reaction, user):
         if user.id == self.bot.user.id or \
@@ -34,9 +37,9 @@ class HelpChannels(commands.Cog):
         channel = self.channels[reaction.message.channel]
         if channel.is_privileged(user):
             print("user is privieleged")
-            if reaction.emoji == conf.yes_react:
-                await channel.reactivate()
             if reaction.emoji == conf.no_react:
+                await channel.reactivate()
+            if reaction.emoji == conf.yes_react:
                 await channel.release()
 
     @commands.command(name="done")

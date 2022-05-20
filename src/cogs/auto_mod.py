@@ -76,11 +76,14 @@ class AutoMod(commands.Cog):
     
     @commands.Cog.listener()
     async def on_message_edit(self, _, after):
-        if after.author.id == self.bot.user.id:
-            return
-        
-        await self.apply_filter(after)
-
+        try:
+            if after.author.id == self.bot.user.id:
+                return
+            
+            await self.apply_filter(after)
+        except Exception as e:
+            print(e)
+            
     @commands.Cog.listener()
     async def on_message(self, msg):
         if msg.author.id == self.bot.user.id:
