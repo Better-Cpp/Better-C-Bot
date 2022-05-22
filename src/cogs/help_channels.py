@@ -27,11 +27,9 @@ class HelpChannels(commands.Cog):
     @commands.Cog.listener()
     async def on_reaction_add(self, reaction, user):
         if user.id == self.bot.user.id or \
-           reaction.message.channel not in category['dormant']:
-            return
-        
-        if reaction.message.channel.last_message_id != reaction.message.id:
-            print("not the last message")
+           reaction.message.channel not in category['dormant'] or \
+           reaction.message.channel.last_message_id != reaction.message.id or \
+           reaction.message.author.id != self.bot.user.id:
             return
 
         channel = self.channels[reaction.message.channel]

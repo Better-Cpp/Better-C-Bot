@@ -26,6 +26,13 @@ class category(metaclass=category_meta):
         return self.id
 
     def __contains__(self, channel):
+        """Checks whether a channel is contained in this category.
+        Args:
+            channel (_type_): _description_
+        Raises:
+            ValueError: if channel was neither a TextChannel nor a channel ID
+        """
+        
         if isinstance(channel, discord.TextChannel):
             return channel.category_id == self.id
         elif isinstance(channel, channels.channel):
@@ -62,29 +69,31 @@ class channels:
             self.message = message
             self.owner = message.author
 
-            await self.message.pin()
-            await self.underlying.send(f"{self.owner.mention} claimed this help channel. Please keep the discussion on topic.\n"
-                                       "Please make this channel available again using `++done` once your question has been answered.")
-            await self.move(category['occupied'])
+            await asyncio.gather(*[self.message.pin(),
+                                   self.underlying.send(f"{self.owner.mention} claimed this help channel. Please keep the discussion on topic.\n"
+                                                        "Please make this channel available again using `++done` once your question has been answered."),
+                                   self.move(category['occupied'], "Channel got claimed")],
+                                 return_exceptions=True)
 
         async def release(self, reason=None):
             try:
                 await self.message.unpin()
             except Exception as e:
                 print(e)
-                
+
             self.owner = None
             self.message = None
-
-            await self.move(category['available'], reason or "Channel released.")
-            await self.open()
-            await self.underlying.send("Channel is now available again. Enter a message to claim it.")
+            await asyncio.gather(*[self.move(category['available'], reason or "Channel released."),
+                                   self.open(),
+                                   self.underlying.send("Channel is now available again. Enter a message to claim it.")],
+                                 return_exceptions=True)
 
         async def reactivate(self):
-            await self.underlying.send("Channel reactivated.")
-            await self.move(category['occupied'])
-            await self.open()
-            
+            await asyncio.gather(*[self.underlying.send("Channel reactivated."),
+                                   self.move(category['occupied'], "Channel became occupied"),
+                                   self.open()],
+                                 return_exceptions=True)
+
         async def close(self):
             await self.underlying.set_permissions(self.underlying.guild.default_role,
                                                   send_messages=False)
@@ -106,14 +115,15 @@ class channels:
                     if not self.owner:
                         await self.release()
                         return
-                    
+
                     msg = await self.underlying.send(f"Channel became dormant. {self.owner.mention} "
                                                      f"can react with {conf.no_react} to reactivate it "
                                                      f"or with {conf.yes_react} to make this channel available again.")
-                    await msg.add_reaction(conf.no_react)
-                    await msg.add_reaction(conf.yes_react)
-                    await self.move(category['dormant'])
-                    await self.close()
+                    await asyncio.gather(*[msg.add_reaction(conf.no_react),
+                                           msg.add_reaction(conf.yes_react),
+                                           self.move(category['dormant']),
+                                           self.close()],
+                                         return_exceptions=True)
 
     def __init__(self, bot):
         self.bot = bot
@@ -150,7 +160,8 @@ class channels:
     @asyncio.coroutine
     async def _check_dormancy(self):
         while True:
-            for chan in self.channels.values():
-                if chan not in category['available']:
-                    await chan.check_dormancy()
-            await asyncio.sleep(conf.recheck_time)
+            await asyncio.gather(*[chan.check_dormancy()
+                                   for chan in self.channels.values()
+                                   if chan not in category['available']],
+                                 return_exceptions=True)
+            await asyncio.sleep(int(conf.recheck_time.total_seconds()))

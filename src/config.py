@@ -1,6 +1,6 @@
 # Elevated permissions
-permitted = [976621757798694932]
-staff_role = 976621757798694932
+permitted = [553478921870508061]
+staff_role = 583646707938623489
 
 # General
 max_msg_size = 2000
@@ -31,21 +31,24 @@ rules_channel = 583301260006916099
 max_del_msgs = 10
 max_edit_msg_age = 86400
 
+# Help channel category ids
+# All channels within these categories will be treated as help channels
 help_categories = {
   'available': 976922937791741982,
   'occupied': 976923113554067496,
   'dormant': 976923166930788382
 }
 
-from datetime import timedelta
+# Role that can reactivate and close help channels without having to own the channel
+helpful_role = 977077468034920449
 
+from datetime import timedelta
 # how often to recheck whether a help channel has become dormant
 # in seconds
-recheck_time = 5
+recheck_time = timedelta(seconds=5)
 
 # after how much time an occupied channel will become dormant
 dormant_time = timedelta(seconds=10)
 
 # after how much time a dormant channel will be available again
 reset_time = timedelta(seconds=30)
-helpful_role = 977077468034920449
