@@ -16,7 +16,6 @@ async def on_ready():
     bot.user_cogs = [
         # "src.cogs.verona",
         "src.cogs.ping",
-        "src.cogs.help_channels",
         "src.cogs.cpp",
         "src.cogs.help",
         "src.cogs.qt",
