@@ -26,26 +26,39 @@ def is_staff(member: discord.Member, source: Optional[discord.abc.GuildChannel] 
         return permissions.manage_messages
     return has_role(member, conf.staff_role)
 
+
+def get_role(role: Union[discord.Role, int, str], guild: Optional[discord.Guild] = None) -> discord.Role:
+    """ 
+    If role is a discord.Role then nothing is pulled from cache
+    If role is an integer then a discord.Role object is pulled from cache
+    if role is a string, then a discord.Role object is pulled from the `guild.roles` cache.
+    If `guild` is None, and `role` is int or str, then TypeError is raised
+    Throws:
+        TypeError see above
+        ValueError if the `role` cannot be retrieved from cache
+    """
+    if role is None:
+        raise ValueError("Role could not be retrieved from cache")
+
+    if guild is None and isinstance(role, (str, int, )):
+        raise TypeError(
+            "Expected a guild since role was str or int, but got None")
+    
+    if type(role) == int:
+        role = discord.utils.get(guild.roles, id=role)
+
+    elif type(role) == str:
+        role = discord.utils.get(guild.roles, name=role)
+
+    elif not isinstance(role, discord.Role):
+        raise TypeError(f"Expected discord.Role, got {type(role)}")
+
+    return role
+
+
 def has_role(member: discord.Member, role: Union[discord.Role, int, str]) -> bool:
-        """ Checks if a user has a role.
-        If role is a discord.Role then nothing is pulled from cache
-        If role is an integer then a discord.Role object is pulled from cache
-        if role is a string, then a discord.Role object is pulled from the `guild.roles` cache.
-        Throws:
-            ValueError if the `role` cannot be retrieved from cache
-            Whatever discord.Member.add_roles can throw
-        Returns True if the member has the role, False if not
-        """
-        if type(role) == int:
-            role = discord.utils.get(member.guild.roles, id=role)
-
-        elif type(role) == str:
-            role = discord.utils.get(member.guild.roles, name=role)
-
-        elif not isinstance(role, discord.Role):
-            raise TypeError(f"Expected discord.Role, got {type(role)}")
-
-        if role is None:
-            raise ValueError("Role could not be retrieved from cache")
-            
-        return role in member.roles
+    """ Checks if a user has a role.
+    Returns True if the member has the role, False if not
+    """
+    role = get_role(role, member.guild)
+    return role in member.roles
