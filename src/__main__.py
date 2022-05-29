@@ -1,7 +1,7 @@
 import aiohttp
 import discord
 from discord.ext import commands
-
+from src.blacklist import blacklist
 
 def prefix(bot, message):
     return [".", "++"]
@@ -39,7 +39,8 @@ async def on_ready():
     print(bot.user.id)
     print('------')
     print(discord.utils.oauth_url(bot.user.id))
-
+    
+    blacklist.load("badwords.txt")
 # @bot.event
 # async def on_member_join(member):
 #     channel = discord.utils.get(

@@ -16,10 +16,10 @@ RUN python3 -m pip install --prefer-binary --user -r requirements.txt
 
 COPY --chown=bettercbot:bettercbot token.txt token.txt
 COPY --chown=bettercbot:bettercbot badwords.txt badwords.txt
+COPY --chown=bettercbot:bettercbot src/blacklist.py src/blacklist.py
 COPY --chown=bettercbot:bettercbot src/__main__.py src/__main__.py
 COPY --chown=bettercbot:bettercbot src/cogs/ src/cogs
 COPY --chown=bettercbot:bettercbot src/backend src/backend
 COPY --chown=bettercbot:bettercbot src/config.py src/config.py
-
 
 CMD ["python3", "-m", "src"]

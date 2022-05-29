@@ -3,6 +3,7 @@ from discord.ext import commands
 from fuzzywuzzy import fuzz, process
 import discord
 
+from src.blacklist import blacklist
 from src import config as conf
 
 class AutoMod(commands.Cog):
@@ -12,14 +13,6 @@ class AutoMod(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.duplicate_msg_detect = True
-
-        self.badwords = set()
-        self.read_words()
-
-    def read_words(self):
-        with open("badwords.txt") as file:
-            for line in file:
-                self.badwords.add(line.strip().lower())
 
     async def is_duplicate(self, message):
         # apparently @everyone is in this list
@@ -71,18 +64,30 @@ class AutoMod(commands.Cog):
         # To keep from getting errors
         return False, None
 
+    async def apply_filter(self, message):
+        msg_content = message.content.lower()
+        if msg_content in blacklist:
+            await message.delete()
+            await message.channel.send(
+                f"{message.author.mention}, your message contained a word that we do not allow, sorry! (reason {blacklist & msg_content})"
+            )
+            return True
+        return False
+    
+    @commands.Cog.listener()
+    async def on_message_edit(self, _, after):
+        if after.author.id == self.bot.user.id:
+            return
+        
+        await self.apply_filter(after)
+
     @commands.Cog.listener()
     async def on_message(self, msg):
         if msg.author.id == self.bot.user.id:
             return
-        msg_content = msg.content.lower()
-        for word in self.badwords:
-            if word not in msg_content:
-                continue
-            await msg.delete()
-            return await msg.channel.send(
-                f"{msg.author.mention}, your message contained a word that we do not allow, sorry!"
-            )
+        
+        if await self.apply_filter(msg):
+            return
 
         is_impatient, duplicate_message = await self.is_duplicate(msg)
         if is_impatient:
