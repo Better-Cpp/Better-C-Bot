@@ -7,7 +7,8 @@ from dataclasses import dataclass
 from discord.ext import commands
 import discord
 
-from src.blacklist import blacklist
+from src.util import permissions
+from src.util.blacklist import blacklist
 from src import config as conf
 
 
@@ -159,7 +160,7 @@ class RulesEnforcer(commands.Cog, name="Rules"):
 
                 def _check(reaction, user, reaction_msg):
                     return ( reaction.message.id == reaction_msg.id
-                        and any(role.id == conf.staff_role for role in user.roles)
+                        and permissions.is_staff(user, reaction_msg.channel)
                         and user.id != self.bot.user.id )
 
                 reaction, user = await self.bot.wait_for('reaction_add',

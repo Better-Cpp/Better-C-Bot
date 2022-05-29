@@ -1,7 +1,7 @@
 import aiohttp
 import discord
 from discord.ext import commands
-from src.blacklist import blacklist
+from src.util.blacklist import blacklist
 
 def prefix(bot, message):
     return [".", "++"]
@@ -15,6 +15,7 @@ bot = commands.Bot(prefix, case_insensitive=True,
 async def on_ready():
     bot.user_cogs = [
         # "src.cogs.verona",
+        "src.cogs.help_channels",
         "src.cogs.cpp",
         "src.cogs.help",
         "src.cogs.qt",
