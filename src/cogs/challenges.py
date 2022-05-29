@@ -13,7 +13,8 @@ async def trigger_role(member: discord.Member, role: Union[discord.Role, int, st
         Whatever discord.Member.add_roles can throw
     returns False if role was removed, True if it was added
     """
-
+    role = permissions.get_role(role, guild)
+    
     if permissions.has_role(member, role):
         await member.remove_roles(role)
         return False
