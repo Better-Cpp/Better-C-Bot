@@ -70,8 +70,7 @@ class channels:
             self.owner = message.author
 
             await asyncio.gather(*[self.message.pin(),
-                                   self.underlying.send(f"{self.owner.mention} claimed this help channel. Please keep the discussion on topic.\n"
-                                                        "Please make this channel available again using `++done` once your question has been answered."),
+                                   self.underlying.send(f"{self.owner.mention} currently owns this help channel. Please make this channel available by using `++done` once your question has been answered."),
                                    self.move(category['occupied'], "Channel got claimed")],
                                  return_exceptions=True)
 
@@ -85,7 +84,7 @@ class channels:
             self.message = None
             await asyncio.gather(*[self.move(category['available'], reason or "Channel released."),
                                    self.open(),
-                                   self.underlying.send("Channel is now available again. Enter a message to claim it.")],
+                                   self.underlying.send("This channel is now available again. Enter a message to claim it.")],
                                  return_exceptions=True)
 
         async def reactivate(self):
@@ -116,9 +115,9 @@ class channels:
                         await self.release()
                         return
 
-                    msg = await self.underlying.send(f"Channel became dormant. {self.owner.mention} "
-                                                     f"can react with {conf.no_react} to reactivate it "
-                                                     f"or with {conf.yes_react} to make this channel available again.")
+                    msg = await self.underlying.send(f"This channel is about to become available again. {self.owner.mention} "
+                                                     f"can react with {conf.no_react} to re-claim it "
+                                                     f"or with {conf.yes_react} to make this channel available again immediately.")
                     await asyncio.gather(*[msg.add_reaction(conf.no_react),
                                            msg.add_reaction(conf.yes_react),
                                            self.move(category['dormant']),
