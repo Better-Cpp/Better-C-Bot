@@ -45,7 +45,7 @@ class HelpChannels(commands.Cog):
         Can only be issued by the channel's occupant and staff."""
 
         if ctx.channel not in category['dormant'] and ctx.channel not in category['occupied']:
-            await ctx.send("This command can only be used in dormant or occupied help channels.")
+            await ctx.send("This command can only be used in owned or available help channels.")
             return
 
         channel = self.channels[ctx.channel]
@@ -53,13 +53,13 @@ class HelpChannels(commands.Cog):
         # assume anyone can free a channel up if we don't know who owns it
         # this could happen due to bot restarts
         if channel.owner == None:
-            await channel.release("Owner unknown, assuming the channel to be available again.")
+            await channel.release("Owner unknown. This channel has become available.")
             return
 
         if channel.is_privileged(ctx.author):
             await channel.release()
         else:
-            await ctx.send(f"Only the channel's current owner {channel.owner.mention} and staff can manually free this channel up.")
+            await ctx.send(f"Only {channel.owner.mention} or staff can manually make this channel available.")
 
 
 def setup(bot):

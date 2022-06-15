@@ -31,26 +31,26 @@ rules_channel = 583301260006916099
 max_del_msgs = 10
 max_edit_msg_age = 86400
 
+ping_role = 873897990958481448
+
 # Help channel category ids
 # All channels within these categories will be treated as help channels
 help_categories = {
-  'available': 976922937791741982,
-  'occupied': 976923113554067496,
-  'dormant': 976923166930788382
+  #todo
+  'available': 983188818452684840,
+  'occupied': 983192540654227536,
+  'dormant': 983193541218021456
 }
 
 # Role that can reactivate and close help channels without having to own the channel
-helpful_role = 977077468034920449
+helpful_role = 983185446047719504
 
 from datetime import timedelta
 # how often to recheck whether a help channel has become dormant
-# in seconds
-recheck_time = timedelta(seconds=5)
+recheck_time = timedelta(seconds=10)
 
 # after how much time an occupied channel will become dormant
-dormant_time = timedelta(seconds=10)
+dormant_time = timedelta(minutes=10)
 
 # after how much time a dormant channel will be available again
-reset_time = timedelta(seconds=30)
-
-ping_role = 978635409296883712
+reset_time = timedelta(minutes=5)
