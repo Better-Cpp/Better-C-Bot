@@ -61,17 +61,17 @@ class channels:
         async def move(self, cat, reason=None):
             await self.underlying.move(category=cat,
                                        beginning=True,
-                                       reason=reason or "Channel released.")
+                                       sync_permissions=True,
+                                       reason=reason or "Channel moved.")
 
         async def claim(self, message):
             if not isinstance(message, discord.Message):
                 raise RuntimeError("Invalid message type.")
             self.message = message
             self.owner = message.author
-
+            await self.move(category['occupied'], "Channel got claimed")
             await asyncio.gather(*[self.message.pin(),
-                                   self.underlying.send(f"{self.owner.mention} currently owns this help channel. Please make this channel available by using `++done` once your question has been answered."),
-                                   self.move(category['occupied'], "Channel got claimed")],
+                                   self.underlying.send(f"{self.owner.mention} currently owns this help channel. Please make this channel available by using `++done` once your question has been answered.")],
                                  return_exceptions=True)
 
         async def release(self, reason=None):
@@ -82,24 +82,12 @@ class channels:
 
             self.owner = None
             self.message = None
-            await asyncio.gather(*[self.move(category['available'], reason or "Channel released."),
-                                   self.open(),
-                                   self.underlying.send("This channel is now available again. Enter a message to claim it.")],
-                                 return_exceptions=True)
+            await self.move(category['available'], reason or "Channel released.")
+            await self.underlying.send("This channel is now available again. Enter a message to claim it.")
 
         async def reactivate(self):
-            await asyncio.gather(*[self.underlying.send("Channel reactivated."),
-                                   self.move(category['occupied'], "Channel became occupied"),
-                                   self.open()],
-                                 return_exceptions=True)
-
-        async def close(self):
-            await self.underlying.set_permissions(self.underlying.guild.default_role,
-                                                  send_messages=False)
-
-        async def open(self):
-            await self.underlying.set_permissions(self.underlying.guild.default_role,
-                                                  overwrite=None)
+            await self.move(category['occupied'], "Channel became occupied")
+            await self.underlying.send("Channel reactivated.")
 
         async def check_dormancy(self):
             last = await self.underlying.fetch_message(self.underlying.last_message_id)
@@ -114,14 +102,12 @@ class channels:
                     if not self.owner:
                         await self.release()
                         return
-
+                    await self.move(category['dormant'])
                     msg = await self.underlying.send(f"This channel is about to become available again. {self.owner.mention} "
                                                      f"can react with {conf.no_react} to re-claim it "
                                                      f"or with {conf.yes_react} to make this channel available again immediately.")
                     await asyncio.gather(*[msg.add_reaction(conf.no_react),
-                                           msg.add_reaction(conf.yes_react),
-                                           self.move(category['dormant']),
-                                           self.close()],
+                                           msg.add_reaction(conf.yes_react)],
                                          return_exceptions=True)
 
     def __init__(self, bot):
