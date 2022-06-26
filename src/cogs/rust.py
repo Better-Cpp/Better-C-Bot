@@ -179,7 +179,11 @@ class Playground(commands.Cog):
         )
 
         async with self.session.post(
-            "https://play.rust-lang.org/execute", data=payload
+            "https://play.rust-lang.org/execute", data=payload,
+            headers = {
+                "Content-Type": "application/json",
+                "Referer": "https://discord.gg/aVESxV8",
+            }
         ) as r:
             if r.status != 200:
                 raise commands.CommandError(
