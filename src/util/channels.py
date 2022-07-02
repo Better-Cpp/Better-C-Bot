@@ -49,6 +49,7 @@ class channels:
             self.underlying = underlying
             self.owner = None
             self.message = None
+            self.asker_role = permissions.get_role(conf.asker_role, self.underlying.guild)
 
         def __index__(self):
             return self.underlying.id
@@ -73,13 +74,15 @@ class channels:
             await asyncio.gather(*[self.message.pin(),
                                    self.underlying.send(f"{self.owner.mention} currently owns this help channel. Please make this channel available by using `++done` once your question has been answered.")],
                                  return_exceptions=True)
+            await self.owner.add_roles(self.asker_role)
 
         async def release(self, reason=None):
             try:
                 await self.message.unpin()
+                await self.owner.remove_roles(self.asker_role)
             except Exception as e:
                 print(e)
-
+            
             self.owner = None
             self.message = None
             await self.move(category['available'], reason or "Channel released.")
