@@ -45,6 +45,9 @@ help_categories = {
 # Role that can reactivate and close help channels without having to own the channel
 helpful_role = 983185446047719504
 
+# Role for users who have currently claimed a help channel
+asker_role = 992839092670832670
+
 from datetime import timedelta
 # how often to recheck whether a help channel has become dormant
 recheck_time = timedelta(seconds=10)
