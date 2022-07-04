@@ -78,8 +78,8 @@ class channels:
 
         async def release(self, reason=None):
             try:
-                await self.message.unpin()
                 await self.owner.remove_roles(self.asker_role)
+                await self.message.unpin()                
             except Exception as e:
                 print(e)
             
