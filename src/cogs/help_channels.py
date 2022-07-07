@@ -9,7 +9,8 @@ class HelpChannels(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.channels = channels(bot)
-
+        self.prefix = tuple(self.bot.command_prefix(None, None))
+        
     @commands.Cog.listener()
     async def on_message(self, msg):
         try:
@@ -18,7 +19,10 @@ class HelpChannels(commands.Cog):
 
             if msg.channel not in category['available']:
                 return
-
+            
+            if msg.content.startswith(self.prefix):
+                return
+                                    
             channel = self.channels[msg.channel]
             await channel.claim(msg)
         except Exception as e:
