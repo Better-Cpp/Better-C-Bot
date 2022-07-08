@@ -50,6 +50,7 @@ class channels:
             self.owner = None
             self.message = None
             self.asker_role = permissions.get_role(conf.asker_role, self.underlying.guild)
+            self.lock = asyncio.Lock()
 
         def __index__(self):
             return self.underlying.id
@@ -68,23 +69,26 @@ class channels:
         async def claim(self, message):
             if not isinstance(message, discord.Message):
                 raise RuntimeError("Invalid message type.")
-            self.message = message
-            self.owner = message.author
-            await self.move(category['occupied'], "Channel got claimed")
-            await asyncio.gather(*[self.message.pin(),
-                                   self.underlying.send(f"{self.owner.mention} currently owns this help channel. Please make this channel available by using `++done` once your question has been answered.")],
-                                 return_exceptions=True)
-            await self.owner.add_roles(self.asker_role)
+            
+            async with self.lock:
+                self.message = message
+                self.owner = message.author
+                await self.move(category['occupied'], "Channel got claimed")
+                await asyncio.gather(*[self.message.pin(),
+                                    self.underlying.send(f"{self.owner.mention} currently owns this help channel. Please make this channel available by using `++done` once your question has been answered.")],
+                                    return_exceptions=True)
+                await self.owner.add_roles(self.asker_role)
 
-        async def release(self, reason=None):
+        async def release(self, reason=None):        
             try:
-                await self.owner.remove_roles(self.asker_role)
-                await self.message.unpin()                
+                async with self.lock:
+                    await self.owner.remove_roles(self.asker_role)
+                    self.owner = None
+                    await self.message.unpin()
+                    self.message = None
             except Exception as e:
                 print(e)
-            
-            self.owner = None
-            self.message = None
+                
             await self.move(category['available'], reason or "Channel released.")
             await self.underlying.send("This channel is now available again. Enter a message to claim it.")
 
