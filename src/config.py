@@ -57,3 +57,6 @@ dormant_time = timedelta(minutes=40)
 
 # after how much time a dormant channel will be available again
 reset_time = timedelta(minutes=10)
+
+# minimum number of available help channels before closing dormant ones
+minimum_available_channels = 3
