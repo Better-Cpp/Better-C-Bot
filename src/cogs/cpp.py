@@ -240,5 +240,5 @@ class cpp(commands.Cog, name="C++"):
         if (datetime.datetime.now() - target_msg.created_at).total_seconds() <= 600:
             await target_msg.delete();
 
-async def setup(bot):
-    await bot.add_cog(cpp(bot))
+def setup(bot):
+    bot.add_cog(cpp(bot))

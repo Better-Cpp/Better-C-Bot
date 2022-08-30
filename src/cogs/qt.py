@@ -38,5 +38,5 @@ class Qt(commands.Cog, name="Qt"):
             return json.load(file)
 
 
-async def setup(bot):
-    await bot.add_cog(Qt(bot))
+def setup(bot):
+    bot.add_cog(Qt(bot))

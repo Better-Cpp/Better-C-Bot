@@ -116,5 +116,5 @@ class Statistics(commands.Cog):
         await ctx.send(ctx.guild.member_count)
 
 
-async def setup(bot):
-    await bot.add_cog(Statistics(bot))
+def setup(bot):
+    bot.add_cog(Statistics(bot))

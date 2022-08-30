@@ -282,5 +282,5 @@ class RulesEnforcer(commands.Cog, name="Rules"):
         await self._update_rules()
         await ctx.send("The rules were updated successully")
 
-async def setup(bot):
-    await bot.add_cog(RulesEnforcer(bot))
+def setup(bot):
+    bot.add_cog(RulesEnforcer(bot))

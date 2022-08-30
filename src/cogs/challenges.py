@@ -35,5 +35,5 @@ class Challenges(commands.Cog):
             await ctx.send("Removed challenges role.")
 
 
-async def setup(bot):
-    await bot.add_cog(Challenges(bot))
+def setup(bot):
+    bot.add_cog(Challenges(bot))

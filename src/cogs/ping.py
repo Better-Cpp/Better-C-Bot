@@ -20,5 +20,5 @@ class Ping(commands.Cog):
                 await msg.reply(f"<@&{conf.ping_role}> please welcome {msg.author.mention}")
                 
 
-async def setup(bot):
-    await bot.add_cog(Ping(bot))
+def setup(bot):
+    bot.add_cog(Ping(bot))

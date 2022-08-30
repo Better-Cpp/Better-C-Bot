@@ -85,9 +85,9 @@ class Help(commands.Cog):
             await ctx.send(embed=self.format_help_for(item))
 
 
-async def setup(bot):
+def setup(bot):
     bot.old_help = bot.remove_command("help")
-    await bot.add_cog(Help(bot))
+    bot.add_cog(Help(bot))
 
 
 def teardown(bot):
