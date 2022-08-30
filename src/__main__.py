@@ -31,7 +31,7 @@ async def on_ready():
     ]
     for cog in bot.user_cogs:
         print(f"Loading {cog}...")
-        bot.load_extension(cog)
+        await bot.load_extension(cog)
         print(f"Loaded {cog}!")
 
     bot.http_client = aiohttp.ClientSession()
