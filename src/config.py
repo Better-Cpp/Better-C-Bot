@@ -53,7 +53,10 @@ from datetime import timedelta
 recheck_time = timedelta(seconds=10)
 
 # after how much time an occupied channel will become dormant
-dormant_time = timedelta(minutes=20)
+dormant_time = timedelta(minutes=40)
 
 # after how much time a dormant channel will be available again
-reset_time = timedelta(minutes=5)
+reset_time = timedelta(minutes=10)
+
+# minimum number of available help channels before closing dormant ones
+minimum_available_channels = 3
