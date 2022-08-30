@@ -259,7 +259,7 @@ class RulesEnforcer(commands.Cog, name="Rules"):
 
     async def _update_rules(self):
         channel = self.bot.get_channel(conf.rules_channel)
-        messages = await channel.history(limit=1000000, oldest_first=True).flatten()
+        messages = [m async for m in channel.history(limit=1000000, oldest_first=True)]
         self._rules = {}
 
         for message in messages:

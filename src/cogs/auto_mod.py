@@ -33,7 +33,7 @@ class AutoMod(commands.Cog):
             if channel == message.channel:
                 continue
 
-            history = await channel.history(limit=30).flatten()
+            history = [m async for m in channel.history(limit=30)]
             async for candidate in history:
                 if candidate.author != message.author:
                     continue
