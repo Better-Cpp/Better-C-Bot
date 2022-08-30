@@ -38,7 +38,7 @@ class Administration(commands.Cog, name="Administration"):
             return await ctx.send("You do not have authorization to use this command")
 
         for cog in self.bot.user_cogs:
-            await self.bot.reload_extension(cog)
+            self.bot.reload_extension(cog)
 
         await ctx.send(
             "Updated cogs:\n```\n{}\n```".format("\n".join(self.bot.user_cogs))
