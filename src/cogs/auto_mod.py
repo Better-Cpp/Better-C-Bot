@@ -15,6 +15,10 @@ class AutoMod(commands.Cog):
         self.duplicate_msg_detect = True
 
     async def is_duplicate(self, message):
+        if not message.guild:
+            return False, None
+
+        author = message.guild.get_member(message.author.id)
         # apparently @everyone is in this list
         if len(message.author.roles) > 1:
             return False, None
