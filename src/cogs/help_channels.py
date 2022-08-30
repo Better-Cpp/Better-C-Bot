@@ -43,12 +43,12 @@ class HelpChannels(commands.Cog):
             if reaction.emoji == conf.yes_react:
                 await channel.release()
 
-    @commands.command(aliases=['done', 'close'])
+    @commands.command(name="done")
     async def _done(self, ctx):
         """Set the current help channel as available. 
         Can only be issued by the channel's occupant and staff."""
 
-        if ctx.channel not in category['occupied'] and ctx.channel not in category['dormant']:
+        if ctx.channel not in category['dormant'] and ctx.channel not in category['occupied']:
             await ctx.send("This command can only be used in owned or available help channels.")
             return
 
