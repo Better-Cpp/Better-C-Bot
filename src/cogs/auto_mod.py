@@ -20,7 +20,7 @@ class AutoMod(commands.Cog):
 
         author = message.guild.get_member(message.author.id)
         # apparently @everyone is in this list
-        if len(message.author.roles) > 1:
+        if len(author.roles) > 1:
             return False, None
 
         if len(message.clean_content) < 50:
@@ -39,7 +39,7 @@ class AutoMod(commands.Cog):
 
             history = [m async for m in channel.history(limit=30)]
             async for candidate in history:
-                if candidate.author != message.author:
+                if candidate.author != author:
                     continue
 
                 # if sent more than 12 hours ago, ignore it, it's probably fine
