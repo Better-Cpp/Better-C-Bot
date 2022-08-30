@@ -133,7 +133,7 @@ class RulesEnforcer(commands.Cog, name="Rules"):
                 if current_time - x["join_time"] <= conf.massjoin_window
             ]
 
-        is_bot_pfp = member.default_avatar_url == member.avatar_url if conf.massjoin_default_pfp else True
+        is_bot_pfp = member.default_avatar_url == member.avatar if conf.massjoin_default_pfp else True
 
         is_bot_age = ( current_time - member.created_at.timestamp() < conf.massjoin_min_acc_age_val
                 if conf.massjoin_min_acc_age else True )

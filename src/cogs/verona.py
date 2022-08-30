@@ -44,7 +44,7 @@ class Verona(commands.Cog, name="Verona"):
                               description=f"Output:\n```\n{result}```", timestamp=datetime.datetime.utcnow())
 
         embed.set_footer(text=str(ctx.message.author),
-                         icon_url=ctx.message.author.avatar_url)
+                         icon_url=ctx.message.author.avatar)
 
         await ctx.send(embed=embed)
 
