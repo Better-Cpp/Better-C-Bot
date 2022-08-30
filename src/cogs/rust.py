@@ -243,5 +243,5 @@ class Playground(commands.Cog):
             await ctx.send(str(error))
 
 
-def setup(bot):
-    bot.add_cog(Playground(bot))
+async def setup(bot):
+    await bot.add_cog(Playground(bot))

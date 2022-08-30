@@ -13,5 +13,5 @@ class General(commands.Cog, name="General"):
     async def lmgtfy(self, ctx, *, term):
         await ctx.send(f"https://letmegooglethat.com/?q={urllib.parse.quote(term)}")
 
-def setup(bot):
-    bot.add_cog(General(bot))
+async def setup(bot):
+    await bot.add_cog(General(bot))

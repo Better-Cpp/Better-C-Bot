@@ -127,5 +127,5 @@ class AutoMod(commands.Cog):
         new_enabled = "enabled" if self.duplicate_msg_detect else "disabled"
         await ctx.reply(f"Duplicated message detection is now {new_enabled}")
 
-def setup(bot):
-    bot.add_cog(AutoMod(bot))
+async def setup(bot):
+    await bot.add_cog(AutoMod(bot))

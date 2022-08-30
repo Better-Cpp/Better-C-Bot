@@ -66,5 +66,5 @@ class HelpChannels(commands.Cog):
             await ctx.send(f"Only {channel.owner.mention} or staff can manually make this channel available.")
 
 
-def setup(bot):
-    bot.add_cog(HelpChannels(bot))
+async def setup(bot):
+    await bot.add_cog(HelpChannels(bot))
