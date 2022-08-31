@@ -38,7 +38,7 @@ class AutoMod(commands.Cog):
                 continue
 
             history = [m async for m in channel.history(limit=30)]
-            async for candidate in history:
+            for candidate in history:
                 if candidate.author != author:
                     continue
 
