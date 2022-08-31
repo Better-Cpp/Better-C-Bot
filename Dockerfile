@@ -4,7 +4,7 @@ FROM python:latest
 
 RUN apt update -y \
     && apt dist-upgrade -y \
-    && apt install clang-format python-Levenshtein -y
+    && apt install clang-format -y
 RUN adduser --disabled-password --gecos "" bettercbot
 USER bettercbot
 WORKDIR /home/bettercbot
@@ -14,10 +14,6 @@ COPY --chown=bettercbot:bettercbot src/cppref src/cppref
 
 COPY --chown=bettercbot:bettercbot requirements.txt requirements.txt
 RUN pip install --user -r requirements.txt
-
-# discord.py dependencies seem broken, idk
-RUN pip install --user -U aiohttp
-RUN pip install --user -U discord.py
 
 COPY --chown=bettercbot:bettercbot token.txt token.txt
 COPY --chown=bettercbot:bettercbot badwords.txt badwords.txt
