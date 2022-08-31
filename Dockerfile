@@ -3,6 +3,7 @@ FROM python:latest
 #RUN python3 py3-pip py3-lxml py3-yarl py3-chardet py3-aiohttp py3-attrs
 
 RUN apt update -y \
+    && apt dist-upgrade -y \
     && apt install clang-format python-Levenshtein -y
 RUN adduser --disabled-password --gecos "" bettercbot
 USER bettercbot
