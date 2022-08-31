@@ -19,6 +19,9 @@ class AutoMod(commands.Cog):
             return False, None
 
         author = message.guild.get_member(message.author.id)
+        if author is None:
+            return False, None
+        
         # apparently @everyone is in this list
         if len(author.roles) > 1:
             return False, None
