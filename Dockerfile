@@ -2,6 +2,8 @@ FROM python:latest
 
 #RUN python3 py3-pip py3-lxml py3-yarl py3-chardet py3-aiohttp py3-attrs
 
+ENV PYTHONUNBUFFERED 1
+
 RUN apt update -y \
     && apt dist-upgrade -y \
     && apt install clang-format -y
