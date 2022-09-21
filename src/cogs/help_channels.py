@@ -30,6 +30,9 @@ class HelpChannels(commands.Cog):
             
     @commands.Cog.listener()
     async def on_reaction_add(self, reaction, user):
+        if not isinstance(reaction.message.channel, discord.TextChannel):
+            return
+        
         if user.id == self.bot.user.id or \
            reaction.message.channel not in category['dormant'] or \
            reaction.message.channel.last_message_id != reaction.message.id or \
@@ -49,7 +52,7 @@ class HelpChannels(commands.Cog):
         Can only be issued by the channel's occupant and staff."""
 
         if ctx.channel not in category['occupied'] and ctx.channel not in category['dormant']:
-            await ctx.send("This command can only be used in owned or available help channels.")
+            await ctx.send("This command can only be used in owned help channels.")
             return
 
         channel = self.channels[ctx.channel]
