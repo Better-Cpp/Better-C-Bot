@@ -53,7 +53,7 @@ from datetime import timedelta
 recheck_time = timedelta(seconds=10)
 
 # after how much time an occupied channel will become dormant
-dormant_time = timedelta(minutes=40)
+dormant_time = timedelta(minutes=60)
 
 # after how much time a dormant channel will be available again
 reset_time = timedelta(minutes=10)

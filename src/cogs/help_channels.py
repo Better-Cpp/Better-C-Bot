@@ -63,7 +63,7 @@ class HelpChannels(commands.Cog):
         if channel.is_privileged(ctx.author):
             await channel.release()
         else:
-            await ctx.send(f"Only {channel.owner.mention} or staff can manually make this channel available.")
+            await ctx.send(f"Only {channel.owner} and staff can manually make this channel available.")
 
 
 async def setup(bot):

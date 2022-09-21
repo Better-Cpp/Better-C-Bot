@@ -1,6 +1,6 @@
 import discord
 import asyncio
-from datetime import datetime
+from datetime import datetime, timezone
 
 from src.util import permissions
 from src import config as conf
@@ -57,8 +57,8 @@ class channels:
             self.question = None
             self.reclaim_message = None
 
-            self.asker_role = permissions.get_role(
-                conf.asker_role, self.underlying.guild)
+            self.asker_role = permissions.get_role(conf.asker_role,
+                                                   self.underlying.guild)
             self.lock = asyncio.Lock()
 
         def __index__(self):
@@ -89,13 +89,28 @@ class channels:
                                      return_exceptions=True)
                 await self.owner.add_roles(self.asker_role)
 
+        async def remove_roles(self):
+            try:
+                if not self.owner:
+                    pins = await self.underlying.pins()
+                    for message in pins:
+                        if permissions.has_role(message.author, self.asker_role):
+                            await message.author.remove_roles(self.asker_role)
+                        await message.unpin()
+                else:
+                    await self.owner.remove_roles(self.asker_role)
+                    await self.question.unpin()
+
+                self.owner = None
+                self.question = None
+
+            except Exception as e:
+                print(e)
+
         async def release(self, expired=False):
             try:
                 async with self.lock:
-                    await self.owner.remove_roles(self.asker_role)
-                    self.owner = None
-                    await self.question.unpin()
-                    self.question = None
+                    await self.remove_roles()
 
                 if self.reclaim_message:
                     await self.reclaim_message.delete()
@@ -114,7 +129,7 @@ class channels:
                 if self.reclaim_message:
                     await self.reclaim_message.delete()
                     self.reclaim_message = None
-                    
+
             except Exception as e:
                 print(e)
 
@@ -123,13 +138,15 @@ class channels:
 
         async def check_dormancy(self):
             last = await self.underlying.fetch_message(self.underlying.last_message_id)
-            diff = datetime.utcnow() - last.created_at
+            diff = datetime.now(timezone.utc) - last.created_at
 
             if self in category['occupied']:
                 if diff > conf.dormant_time:
                     if not self.owner:
+                        print("no owner, releasing")
                         await self.release()
                         return
+
                     await self.move(category['dormant'])
                     self.reclaim_message = await self.underlying.send(f"This channel is about to become available again. {self.owner.mention} "
                                                                       f"can react with {conf.no_react} to re-claim it "
@@ -138,9 +155,10 @@ class channels:
                     await asyncio.gather(*[self.reclaim_message.add_reaction(conf.no_react),
                                            self.reclaim_message.add_reaction(conf.yes_react)],
                                          return_exceptions=True)
-            
-            if self in category['dormant'] and len(category['available']) < conf.minimum_available_channels:
-                if diff > conf.reset_time:
+
+            elif self in category['dormant']:
+                if len(category['available']) < conf.minimum_available_channels \
+                        and diff > conf.reset_time:
                     await self.release(expired=True)
 
     def __init__(self, bot):
