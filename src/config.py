@@ -50,7 +50,7 @@ asker_role = 992839092670832670
 
 from datetime import timedelta
 # how often to recheck whether a help channel has become dormant
-recheck_time = timedelta(seconds=10)
+recheck_time = timedelta(seconds=5)
 
 # after how much time an occupied channel will become dormant
 dormant_time = timedelta(minutes=60)
