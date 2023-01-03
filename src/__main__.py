@@ -16,7 +16,8 @@ async def on_ready():
     bot.user_cogs = [
         # "src.cogs.verona",
         "src.cogs.ping",
-        "src.cogs.help_channels",
+        #"src.cogs.help_channels",
+        "src.cogs.forums",
         "src.cogs.cpp",
         "src.cogs.help",
         "src.cogs.qt",
@@ -33,7 +34,8 @@ async def on_ready():
         print(f"Loading {cog}...")
         await bot.load_extension(cog)
         print(f"Loaded {cog}!")
-
+    await bot.tree.sync()
+    
     bot.http_client = aiohttp.ClientSession()
 
     print('Logged in as')
@@ -43,6 +45,7 @@ async def on_ready():
     print(discord.utils.oauth_url(bot.user.id))
     
     blacklist.load("badwords.txt")
+
 # @bot.event
 # async def on_member_join(member):
 #     channel = discord.utils.get(
@@ -60,3 +63,4 @@ with open("token.txt", 'r') as file:
     TOKEN = file.read().strip()
 
 bot.run(TOKEN)
+

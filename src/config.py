@@ -46,6 +46,11 @@ help_categories = {
 # Role that can reactivate and close help channels without having to own the channel
 helpful_role = 983185446047719504
 
+closeable = {
+  1045182836107395124 : 'Done', # help
+  1055500115432972318 : 'Done'  # code-review
+}
+
 # Role for users who have currently claimed a help channel
 asker_role = 992839092670832670
 
