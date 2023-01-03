@@ -28,20 +28,11 @@ dupe_thresh = 0.8
 # Rule scanner
 rules_channel = 583301260006916099
 
-# Delted message sniping
+# Deleted message sniping
 max_del_msgs = 10
 max_edit_msg_age = 86400
 
 ping_role = 873897990958481448
-
-# Help channel category ids
-# All channels within these categories will be treated as help channels
-help_categories = {
-  #todo
-  'available': 983188818452684840,
-  'occupied': 983192540654227536,
-  'dormant': 983193541218021456
-}
 
 # Role that can reactivate and close help channels without having to own the channel
 helpful_role = 983185446047719504
@@ -50,19 +41,3 @@ closeable = {
   1045182836107395124 : 'Done', # help
   1055500115432972318 : 'Done'  # code-review
 }
-
-# Role for users who have currently claimed a help channel
-asker_role = 992839092670832670
-
-from datetime import timedelta
-# how often to recheck whether a help channel has become dormant
-recheck_time = timedelta(seconds=5)
-
-# after how much time an occupied channel will become dormant
-dormant_time = timedelta(minutes=60)
-
-# after how much time a dormant channel will be available again
-reset_time = timedelta(minutes=10)
-
-# minimum number of available help channels before closing dormant ones
-minimum_available_channels = 3
