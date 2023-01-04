@@ -44,10 +44,10 @@ def get_role(role: Union[discord.Role, int, str], guild: Optional[discord.Guild]
         raise TypeError(
             "Expected a guild since role was str or int, but got None")
     
-    if type(role) == int:
+    if isinstance(role, int):
         role = discord.utils.get(guild.roles, id=role)
 
-    elif type(role) == str:
+    elif isinstance(role, str):
         role = discord.utils.get(guild.roles, name=role)
 
     elif not isinstance(role, discord.Role):

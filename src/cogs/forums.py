@@ -32,8 +32,8 @@ class Forums(commands.Cog):
             return
 
         if ctx.channel.id == ctx.message.id:
-            await ctx.send("No.")
-            return
+            # forum starter post invokes this command
+            return await ctx.send("No.")
 
         if ctx.author == ctx.channel.owner \
                 or permissions.is_staff(ctx.author, ctx.channel) \
