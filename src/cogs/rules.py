@@ -9,6 +9,7 @@ import discord
 
 from src.util import permissions
 from src.util.blacklist import blacklist
+from src.util.rules import Rules
 from src import config as conf
 
 
@@ -33,15 +34,8 @@ class RulesEnforcer(commands.Cog, name="Rules"):
         self.massjoin_detect = True
         self.massjoin_active = False
 
+        self.rules = Rules()
         bot.loop.create_task(self._update_rules())
-
-    @commands.command()
-    async def rule(self, ctx, number):
-        """Display a rule"""
-        if self._rules.get(number) is None:
-            return await ctx.send(f"Invalid rule number: `{discord.utils.escape_mentions(number)}`")
-        else:
-            await ctx.send(f"**Rule {number}**:\n{self._rules[number]}")
 
     def _change_msg(self, entry, status):
         user = str(entry.msg.author)
@@ -59,11 +53,11 @@ class RulesEnforcer(commands.Cog, name="Rules"):
 
         if index >= len(histories):
             return await ctx.send(f"The bot currently has only {len(histories)} deleted messages stored "
-                                   "with index 0 being the most recently deleted message")
+                                  "with index 0 being the most recently deleted message")
 
         history = self._deleted[ctx.channel][-1 - index]
         message = history[-1]
-        
+
         msg_content = message.msg.content.lower()
         if msg_content in blacklist:
             return await ctx.message.reply( "The requested deleted message contained a word that we do not allow, sorry! "
@@ -257,30 +251,35 @@ class RulesEnforcer(commands.Cog, name="Rules"):
             if v[-1].time > now - conf.max_edit_msg_age
         }
 
+    @commands.hybrid_command(with_app_command=True)
+    async def rule(self, ctx, rule: int, subrule: int = None):
+        """Display a rule"""
+        text: str = ""
+
+        if rule not in self.rules:
+            return await ctx.send(f"Invalid rule number: `{rule}`")
+
+        if subrule is not None:
+            if subrule <= 0 or subrule > len(self.rules[rule].subrules):
+                return await ctx.send(f"Invalid rule number: `{rule}` `{subrule}`")
+
+            await ctx.send(self.rules[rule].subrules[subrule - 1])
+        else:
+            await ctx.send(str(self.rules[rule]))
+
     async def _update_rules(self):
         channel = self.bot.get_channel(conf.rules_channel)
-        messages = [m async for m in channel.history(limit=1000000, oldest_first=True)]
-        self._rules = {}
+        messages = [m async for m in channel.history(limit=1, oldest_first=True)]
+        assert len(messages) == 1
 
-        for message in messages:
-            content = message.clean_content
-            matches = re.finditer(r"(\d+) - (.+?)(?=[\n ]+\d+? - |$)", content, flags=re.DOTALL)
-
-            for rule in matches:
-                if rule[0] == "":
-                    continue
-
-                number = rule[1]
-                text = rule[2]
-
-                if self._rules.get(number) is None:
-                    self._rules[number] = text
+        self.rules.parse(messages[0].clean_content)
 
     @commands.command(hidden=True)
     @commands.has_role(conf.staff_role)
     async def update_rules(self, ctx):
         await self._update_rules()
         await ctx.send("The rules were updated successully")
+
 
 async def setup(bot):
     await bot.add_cog(RulesEnforcer(bot))
