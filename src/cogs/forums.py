@@ -39,12 +39,6 @@ class Forums(commands.Cog):
                 or permissions.is_staff(ctx.author, ctx.channel) \
                 or permissions.has_role(ctx.author, conf.helpful_role):
 
-            if not ctx.interaction:
-                await ctx.message.delete()
-            else:
-                # respond to the user invoking the slash command
-                await ctx.send("Closing.", ephemeral=True)
-
             apply_tags = {}
             if ctx.channel.parent.id in self.mapping:
                 close_tag = self.mapping[ctx.channel.parent.id]
@@ -52,9 +46,11 @@ class Forums(commands.Cog):
                 if close_tag not in tags:
                     tags = tags[:4]  # can only set 5 tags at a time
                     tags.insert(0, close_tag)
-                apply_tags = {'applied_tags': tags}
+                    apply_tags = {'applied_tags': tags}
 
-            await ctx.channel.edit(locked=True, archived=True, **apply_tags)
+                    await ctx.send("Marked this thread as :white_check_mark: done.")
+
+            await ctx.channel.edit(archived=True, **apply_tags)
 
 
 async def setup(bot):
