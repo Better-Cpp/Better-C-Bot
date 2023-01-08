@@ -43,7 +43,7 @@ class RulesEnforcer(commands.Cog, name="Rules"):
         content = entry.msg.clean_content
         return f"**{discord.utils.escape_markdown(discord.utils.escape_mentions(user))}** {status} on {ts} UTC:\n{content}\n"
 
-    @commands.command()
+    @commands.hybrid_command(with_app_command=True)
     async def snipe(self, ctx, number=None):
         if ctx.channel not in self._deleted:
             return await ctx.send("No message to snipe.")
@@ -60,7 +60,7 @@ class RulesEnforcer(commands.Cog, name="Rules"):
 
         msg_content = message.msg.content.lower()
         if msg_content in blacklist:
-            return await ctx.message.reply( "The requested deleted message contained a word that we do not allow, sorry! "
+            return await ctx.send( "The requested deleted message contained a word that we do not allow, sorry! "
                                            f"(offender {message.msg.author.mention}, reason {blacklist & msg_content})")
 
         message = self._change_msg(history[-1], "deleted")
@@ -68,7 +68,7 @@ class RulesEnforcer(commands.Cog, name="Rules"):
         for state in reversed(history[:-1]):
             message += self._change_msg(state, "edited")
 
-        return await self._reply_chunks(ctx.message, self._chunk_message(message))
+        return await self._send_big_msg(ctx, message)
 
     @commands.command()
     async def history(self, ctx):
@@ -105,8 +105,15 @@ class RulesEnforcer(commands.Cog, name="Rules"):
             messages.append(chunk[:end_index])
             msg = msg[end_index + 1:]
 
-        messages.append(msg)
+        if len(msg) > 0 and not msg.isspace():
+            messages.append(msg)
+
         return messages
+
+    async def _send_big_msg(self, ctx, msg):
+        for msg in self._chunk_message(msg):
+            print(msg)
+            await ctx.send(msg)
 
     async def _reply_chunks(self, reply, msgs):
         for msg in msgs:
