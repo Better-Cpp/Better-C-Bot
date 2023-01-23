@@ -6,6 +6,7 @@ import discord
 
 from src.util import permissions
 from src.util.rules import Rules
+from src.util import util
 from src import config as conf
 
 class RulesEnforcer(commands.Cog, name="Rules"):
@@ -19,41 +20,6 @@ class RulesEnforcer(commands.Cog, name="Rules"):
 
         self.rules = Rules()
         bot.loop.create_task(self._update_rules())
-
-    async def _notify_staff(self, guild, message):
-        role = conf.staff_role
-
-        channel = guild.system_channel
-        if channel:
-            return await channel.send(f"<@&{role}> {message}")
-
-    def _chunk_message(self, msg):
-        messages = []
-        while len(msg) > conf.max_msg_size:
-            chunk = msg[:conf.max_msg_size]
-
-            end_index = chunk.rfind('\n')
-            if end_index == -1:
-                end_index = conf.max_msg_size
-
-            messages.append(chunk[:end_index])
-            msg = msg[end_index + 1:]
-
-        if len(msg) > 0 and not msg.isspace():
-            messages.append(msg)
-
-        return messages
-
-    async def _send_big_msg(self, ctx, msg):
-        for msg in self._chunk_message(msg):
-            print(msg)
-            await ctx.send(msg)
-
-    async def _reply_chunks(self, reply, msgs):
-        for msg in msgs:
-            reply = await reply.reply(msg)
-
-        return reply
 
     @commands.Cog.listener()
     async def on_member_join(self, member):
@@ -86,7 +52,7 @@ class RulesEnforcer(commands.Cog, name="Rules"):
             try:
                 self.massjoin_active = True
 
-                msg = await self._notify_staff(member.guild,
+                msg = await util.notify_staff(member.guild,
                                                f"Mass member join detected. React with {conf.yes_react} to take action "
                                                + f"or with {conf.no_react} to ignore")
 
@@ -112,7 +78,7 @@ class RulesEnforcer(commands.Cog, name="Rules"):
                         filter(lambda x: not x["assumed_bot"], self._recent_joins))) )
 
 
-                    reply = await self._reply_chunks(msg, self._chunk_message(wizard_msg))
+                    reply = await util.reply_chunks(msg, wizard_msg)
 
                     await reply.add_reaction(conf.no_react)
                     await reply.add_reaction(conf.yes_react)
@@ -141,10 +107,10 @@ class RulesEnforcer(commands.Cog, name="Rules"):
                                 await ban_start_msg.reply("Banning failed with the following exception:\n"
                                                           + f"```py\n{traceback.format_exc()}\n```")
 
-                        await self._reply_chunks(
+                        await util.reply_chunks(
                             ban_start_msg,
-                            self._chunk_message("Banned all bots except:\n"
-                                                + ",\n".join(map(lambda x: f"<@{x}>", failed_bans))))
+                            "Banned all bots except:\n"
+                                                + ",\n".join(map(lambda x: f"<@{x}>", failed_bans)))
 
                     await reply.clear_reactions()
 

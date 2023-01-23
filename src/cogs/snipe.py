@@ -6,6 +6,7 @@ import discord
 from discord.ext import commands
 
 from src.util.blacklist import blacklist
+from src.util import util
 from src import config as conf
 
 @dataclass
@@ -22,34 +23,6 @@ class Sniper(commands.Cog, name="Snipe"):
 
         # Maps message id : history of edited message
         self._message_history = {}
-
-    def _chunk_message(self, msg):
-        messages = []
-        while len(msg) > conf.max_msg_size:
-            chunk = msg[:conf.max_msg_size]
-
-            end_index = chunk.rfind('\n')
-            if end_index == -1:
-                end_index = conf.max_msg_size
-
-            messages.append(chunk[:end_index])
-            msg = msg[end_index + 1:]
-
-        if len(msg) > 0 and not msg.isspace():
-            messages.append(msg)
-
-        return messages
-
-    async def _send_big_msg(self, ctx, msg):
-        for msg in self._chunk_message(msg):
-            print(msg)
-            await ctx.send(msg)
-
-    async def _reply_chunks(self, reply, msgs):
-        for msg in msgs:
-            reply = await reply.reply(msg)
-
-        return reply
 
     def _change_msg(self, entry, status):
         user = str(entry.msg.author)
@@ -88,7 +61,7 @@ class Sniper(commands.Cog, name="Snipe"):
         for state in reversed(history[:-1]):
             message += self._change_msg(state, "edited")
 
-        return await self._send_big_msg(ctx, message)
+        return await util.send_big_msg(ctx, message)
 
     @commands.command()
     async def history(self, ctx):
@@ -104,7 +77,7 @@ class Sniper(commands.Cog, name="Snipe"):
         for state in reversed(history):
             message += self._change_msg(state, "edited")
 
-        return await self._reply_chunks(ctx.message, self._chunk_message(message))
+        return await util.reply_chunks(ctx.message, message)
 
     @commands.Cog.listener()
     async def on_message_delete(self, message):
