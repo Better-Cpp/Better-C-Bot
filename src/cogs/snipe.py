@@ -4,6 +4,7 @@ from dataclasses import dataclass
 
 import discord
 from discord.ext import commands
+from discord.ext.commands import Context
 
 from src.util.blacklist import blacklist
 from src.util import util
@@ -12,19 +13,19 @@ from src import config as conf
 @dataclass
 class Entry:
     time: float
-    msg: str
+    msg: discord.Message
 
 class Sniper(commands.Cog, name="Snipe"):
     def __init__(self, bot):
         self.bot = bot
 
         # Maps channel : list of history of deleted messages
-        self._deleted = {}
+        self._deleted: dict[discord.abc.MessageableChannel, list[list[Entry]]] = {}
 
         # Maps message id : history of edited message
-        self._message_history = {}
+        self._message_history: dict[int, list[Entry]] = {}
 
-    def _change_msg(self, entry, status):
+    def _change_msg(self, entry: Entry, status: str):
         user = str(entry.msg.author)
         ts = datetime.fromtimestamp(entry.time).isoformat(" ", "seconds")
         content = entry.msg.clean_content
@@ -37,12 +38,12 @@ class Sniper(commands.Cog, name="Snipe"):
 
 
     @commands.hybrid_command(with_app_command=True)
-    async def snipe(self, ctx, number=None):
+    async def snipe(self, ctx: Context, number: int = 0):
         if ctx.channel not in self._deleted:
             return await ctx.send("No message to snipe.")
 
         histories = self._deleted[ctx.channel]
-        index = abs(int(number)) if number else 0
+        index = abs(number)
 
         if index >= len(histories):
             return await ctx.send(f"The bot currently has only {len(histories)} deleted messages stored "
@@ -64,7 +65,7 @@ class Sniper(commands.Cog, name="Snipe"):
         return await util.send_big_msg(ctx, message)
 
     @commands.command()
-    async def history(self, ctx):
+    async def history(self, ctx: Context):
         if not ctx.message.reference:
             return await ctx.send("No message is replied to")
 
@@ -80,7 +81,7 @@ class Sniper(commands.Cog, name="Snipe"):
         return await util.reply_chunks(ctx.message, message)
 
     @commands.Cog.listener()
-    async def on_message_delete(self, message):
+    async def on_message_delete(self, message: discord.Message):
         channel = message.channel
 
         if channel not in self._deleted:
@@ -96,7 +97,7 @@ class Sniper(commands.Cog, name="Snipe"):
         self._deleted[channel] = self._deleted[channel][-conf.max_del_msgs:]
 
     @commands.Cog.listener()
-    async def on_message_edit(self, old, _):
+    async def on_message_edit(self, old: discord.Message, _):
         if old.id not in self._message_history:
             self._message_history[old.id] = []
 
@@ -108,3 +109,5 @@ class Sniper(commands.Cog, name="Snipe"):
             if v[-1].time > now - conf.max_edit_msg_age
         }
 
+async def setup(bot):
+    await bot.add_cog(Sniper(bot))
