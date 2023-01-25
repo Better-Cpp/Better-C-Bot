@@ -1,68 +1,57 @@
-import time
 from datetime import datetime
 from dataclasses import dataclass
+from typing import cast
 
 import discord
 from discord.ext import commands
 from discord.ext.commands import Context
 
 from src.util.blacklist import blacklist
+from src.util.snipe import *
 from src.util import util
 from src import config as conf
 
 @dataclass
-class Entry:
-    time: float
-    msg: discord.Message
+class MessageHistory:
+    deleted: datetime
+    states: list[discord.Message]
 
 class Sniper(commands.Cog, name="Snipe"):
     def __init__(self, bot):
         self.bot = bot
 
         # Maps channel : list of history of deleted messages
-        self._deleted: dict[discord.abc.MessageableChannel, list[list[Entry]]] = {}
+        self._deleted: dict[int, list[MessageHistory]] = {}
 
         # Maps message id : history of edited message
-        self._message_history: dict[int, list[Entry]] = {}
-
-    def _change_msg(self, entry: Entry, status: str):
-        user = str(entry.msg.author)
-        ts = datetime.fromtimestamp(entry.time).isoformat(" ", "seconds")
-        content = entry.msg.clean_content
-
-        for attachment in entry.msg.attachments:
-            content += "\n" + attachment.proxy_url
-            content += "\n" + attachment.url
-
-        return f"**{discord.utils.escape_markdown(discord.utils.escape_mentions(user))}** {status} on {ts} UTC:\n{content}\n"
-
+        self._message_history: dict[int, list[discord.Message]] = {}
 
     @commands.hybrid_command(with_app_command=True)
     async def snipe(self, ctx: Context, number: int = 0):
-        if ctx.channel not in self._deleted:
+        if ctx.channel.id not in self._deleted:
             return await ctx.send("No message to snipe.")
 
-        histories = self._deleted[ctx.channel]
+        histories = self._deleted[ctx.channel.id]
         index = abs(number)
 
         if index >= len(histories):
             return await ctx.send(f"The bot currently has only {len(histories)} deleted messages stored "
                                   "with index 0 being the most recently deleted message")
 
-        history = self._deleted[ctx.channel][-1 - index]
-        message = history[-1]
+        history = histories[-1 - index]
 
-        msg_content = message.msg.content.lower()
+        message = history.states[-1]
+        msg_content = message.content.lower()
         if msg_content in blacklist:
             return await ctx.send( "The requested deleted message contained a word that we do not allow, sorry! "
-                                           f"(offender {message.msg.author.mention}, reason {blacklist & msg_content})")
+                                           f"(offender {message.author.mention}, reason {blacklist & msg_content})")
 
-        message = self._change_msg(history[-1], "deleted")
+        messages = into_embeds_chunks(history.states)
 
-        for state in reversed(history[:-1]):
-            message += self._change_msg(state, "edited")
+        await ctx.send(f"Deleted <t:{ int(history.deleted.timestamp()) }:R>", embeds=messages.pop(0))
 
-        return await util.send_big_msg(ctx, message)
+        for msg_embeds in messages:
+            await ctx.send(embeds=msg_embeds)
 
     @commands.command()
     async def history(self, ctx: Context):
@@ -74,39 +63,44 @@ class Sniper(commands.Cog, name="Snipe"):
 
         history = self._message_history[ctx.message.reference.message_id]
 
-        message = ""
-        for state in reversed(history):
-            message += self._change_msg(state, "edited")
+        reply = ctx.message
+        for embeds in into_embeds_chunks(history):
+            reply = await reply.reply(embeds=embeds)
 
-        return await util.reply_chunks(ctx.message, message)
+    @commands.hybrid_command()
+    @commands.has_role(conf.staff_role)
+    async def clear(self, ctx: Context):
+        self._deleted[ctx.channel.id] = []
+
+        await ctx.send("Cleared snipe buffer")
 
     @commands.Cog.listener()
     async def on_message_delete(self, message: discord.Message):
-        channel = message.channel
+        c_id = message.channel.id
+        if c_id not in self._deleted:
+            self._deleted[c_id] = []
 
-        if channel not in self._deleted:
-            self._deleted[channel] = []
+        history = []
+        if message.id in self._message_history:
+            history = self._message_history.pop(message.id)
 
-        if message.id not in self._message_history:
-            self._deleted[channel].append([Entry(time.time(), message)])
-        else:
-            self._message_history[message.id].append(Entry(time.time(), message))
-            self._deleted[channel].append(self._message_history[message.id])
-            self._message_history.pop(message.id)
+        history.append(message)
 
-        self._deleted[channel] = self._deleted[channel][-conf.max_del_msgs:]
+        buffer = self._deleted[c_id]
+        buffer.append(MessageHistory(datetime.now(), history))
+        buffer = buffer[-conf.max_del_msgs:]
 
     @commands.Cog.listener()
     async def on_message_edit(self, old: discord.Message, _):
         if old.id not in self._message_history:
             self._message_history[old.id] = []
 
-        self._message_history[old.id].append(Entry(time.time(), old))
+        self._message_history[old.id].append(old)
 
-        now = time.time()
+        now = datetime.utcnow()
         self._message_history = {
             k: v for k, v in self._message_history.items()
-            if v[-1].time > now - conf.max_edit_msg_age
+            if timestamp(v[-1]).replace(tzinfo=None) > now - conf.max_edit_msg_age
         }
 
 async def setup(bot):
