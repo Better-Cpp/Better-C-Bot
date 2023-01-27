@@ -6,6 +6,7 @@ def timestamp(msg: discord.Message):
     return msg.edited_at if msg.edited_at is not None else msg.created_at
 
 def into_embeds_chunks(history: list[discord.Message]):
+    assert history
     author = history[0].author.display_name
     avatar = history[0].author.display_avatar
 
@@ -17,7 +18,7 @@ def into_embeds_chunks(history: list[discord.Message]):
     messages: list[list[discord.Embed]] = [[]]
 
     cur_length = 0
-    for (length, embed) in embeds:
+    for length, embed in embeds:
         if cur_length + length > conf.max_msg_embeds_size or len(messages[-1]) >= 10:
             messages.append([embed])
             cur_length = length
