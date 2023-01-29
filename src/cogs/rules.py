@@ -1,33 +1,17 @@
-import re
 import time
 import traceback
-from datetime import datetime
-from dataclasses import dataclass
 
 from discord.ext import commands
 import discord
 
 from src.util import permissions
-from src.util.blacklist import blacklist
 from src.util.rules import Rules
+from src.util import util
 from src import config as conf
-
-
-@dataclass
-class Entry:
-    time: float
-    msg: str
-
 
 class RulesEnforcer(commands.Cog, name="Rules"):
     def __init__(self, bot):
         self.bot = bot
-
-        # Maps channel : list of history of deleted messages
-        self._deleted = {}
-
-        # Maps message id : history of edited message
-        self._message_history = {}
 
         self._recent_joins = []
 
@@ -36,83 +20,6 @@ class RulesEnforcer(commands.Cog, name="Rules"):
 
         self.rules = Rules()
         bot.loop.create_task(self._update_rules())
-
-    def _change_msg(self, entry, status):
-        user = str(entry.msg.author)
-        ts = datetime.fromtimestamp(entry.time).isoformat(" ", "seconds")
-        content = entry.msg.clean_content
-        return f"**{discord.utils.escape_markdown(discord.utils.escape_mentions(user))}** {status} on {ts} UTC:\n{content}\n"
-
-    @commands.command()
-    async def snipe(self, ctx, number=None):
-        if ctx.channel not in self._deleted:
-            return await ctx.send("No message to snipe.")
-
-        histories = self._deleted[ctx.channel]
-        index = abs(int(number)) if number else 0
-
-        if index >= len(histories):
-            return await ctx.send(f"The bot currently has only {len(histories)} deleted messages stored "
-                                  "with index 0 being the most recently deleted message")
-
-        history = self._deleted[ctx.channel][-1 - index]
-        message = history[-1]
-
-        msg_content = message.msg.content.lower()
-        if msg_content in blacklist:
-            return await ctx.message.reply( "The requested deleted message contained a word that we do not allow, sorry! "
-                                           f"(offender {message.msg.author.mention}, reason {blacklist & msg_content})")
-
-        message = self._change_msg(history[-1], "deleted")
-
-        for state in reversed(history[:-1]):
-            message += self._change_msg(state, "edited")
-
-        return await self._reply_chunks(ctx.message, self._chunk_message(message))
-
-    @commands.command()
-    async def history(self, ctx):
-        if not ctx.message.reference:
-            return await ctx.send("No message is replied to")
-
-        if ctx.message.reference.message_id not in self._message_history:
-            return await ctx.send("Message either never edited or too old")
-
-        history = self._message_history[ctx.message.reference.message_id]
-
-        message = ""
-        for state in reversed(history):
-            message += self._change_msg(state, "edited")
-
-        return await self._reply_chunks(ctx.message, self._chunk_message(message))
-
-    async def _notify_staff(self, guild, message):
-        role = conf.staff_role
-
-        channel = guild.system_channel
-        if channel:
-            return await channel.send(f"<@&{role}> {message}")
-
-    def _chunk_message(self, msg):
-        messages = []
-        while len(msg) > conf.max_msg_size:
-            chunk = msg[:conf.max_msg_size]
-
-            end_index = chunk.rfind('\n')
-            if end_index == -1:
-                end_index = conf.max_msg_size
-
-            messages.append(chunk[:end_index])
-            msg = msg[end_index + 1:]
-
-        messages.append(msg)
-        return messages
-
-    async def _reply_chunks(self, reply, msgs):
-        for msg in msgs:
-            reply = await reply.reply(msg)
-
-        return reply
 
     @commands.Cog.listener()
     async def on_member_join(self, member):
@@ -145,7 +52,7 @@ class RulesEnforcer(commands.Cog, name="Rules"):
             try:
                 self.massjoin_active = True
 
-                msg = await self._notify_staff(member.guild,
+                msg = await util.notify_staff(member.guild,
                                                f"Mass member join detected. React with {conf.yes_react} to take action "
                                                + f"or with {conf.no_react} to ignore")
 
@@ -171,7 +78,7 @@ class RulesEnforcer(commands.Cog, name="Rules"):
                         filter(lambda x: not x["assumed_bot"], self._recent_joins))) )
 
 
-                    reply = await self._reply_chunks(msg, self._chunk_message(wizard_msg))
+                    reply = await util.reply_chunks(msg, wizard_msg)
 
                     await reply.add_reaction(conf.no_react)
                     await reply.add_reaction(conf.yes_react)
@@ -200,10 +107,10 @@ class RulesEnforcer(commands.Cog, name="Rules"):
                                 await ban_start_msg.reply("Banning failed with the following exception:\n"
                                                           + f"```py\n{traceback.format_exc()}\n```")
 
-                        await self._reply_chunks(
+                        await util.reply_chunks(
                             ban_start_msg,
-                            self._chunk_message("Banned all bots except:\n"
-                                                + ",\n".join(map(lambda x: f"<@{x}>", failed_bans))))
+                            "Banned all bots except:\n"
+                                                + ",\n".join(map(lambda x: f"<@{x}>", failed_bans)))
 
                     await reply.clear_reactions()
 
@@ -221,35 +128,6 @@ class RulesEnforcer(commands.Cog, name="Rules"):
             await ctx.send("Massjoin detection is now on")
         else:
             await ctx.send("Massjoin detection is now off")
-
-    @commands.Cog.listener()
-    async def on_message_delete(self, message):
-        channel = message.channel
-
-        if channel not in self._deleted:
-            self._deleted[channel] = []
-
-        if message.id not in self._message_history:
-            self._deleted[channel].append([Entry(time.time(), message)])
-        else:
-            self._message_history[message.id].append(Entry(time.time(), message))
-            self._deleted[channel].append(self._message_history[message.id])
-            self._message_history.pop(message.id)
-
-        self._deleted[channel] = self._deleted[channel][-conf.max_del_msgs:]
-
-    @commands.Cog.listener()
-    async def on_message_edit(self, old, _):
-        if old.id not in self._message_history:
-            self._message_history[old.id] = []
-
-        self._message_history[old.id].append(Entry(time.time(), old))
-
-        now = time.time()
-        self._message_history = {
-            k: v for k, v in self._message_history.items()
-            if v[-1].time > now - conf.max_edit_msg_age
-        }
 
     @commands.hybrid_command(with_app_command=True)
     async def rule(self, ctx, rule: int, subrule: int = None):
