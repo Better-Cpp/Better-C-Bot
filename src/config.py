@@ -35,6 +35,9 @@ rules_channel = 583301260006916099
 max_del_msgs = 10
 max_edit_msg_age = timedelta(days=1)
 
+# Edited message history
+max_edit_msg = 10
+
 ping_role = 873897990958481448
 
 # Role that can reactivate and close help channels without having to own the channel

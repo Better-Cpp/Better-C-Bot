@@ -22,7 +22,7 @@ class Sniper(commands.Cog, name="Snipe"):
         self._deleted: dict[int, deque[DeletedHistory]] = defaultdict(lambda: deque(maxlen=conf.max_del_msgs))
 
         # Maps message id : history of edited message
-        self._message_history: dict[int, list[discord.Message]] = defaultdict(list)
+        self._message_history: dict[int, list[discord.Message]] = defaultdict(lambda: deque(maxlen=conf.max_edit_msg))
 
     @commands.hybrid_command(with_app_command=True)
     async def snipe(self, ctx: Context, number: int = 0):
