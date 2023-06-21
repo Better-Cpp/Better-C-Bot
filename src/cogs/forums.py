@@ -1,9 +1,10 @@
+import asyncio
+
 from discord.ext import commands
 import discord
 
 from src import config as conf
 from src.util import permissions
-
 
 class Forums(commands.Cog):
     def __init__(self, bot):
@@ -63,7 +64,7 @@ class Forums(commands.Cog):
         msg = msg.resolved
 
         channel: discord.ForumChannel = self.bot.get_channel(conf.help_channel)
-        files = [await file.to_file() for file in msg.attachments]
+        files = await asyncio.gather(*[file.to_file() for file in msg.attachments])
 
         thread, _ = await channel.create_thread(name = f"{msg.author.display_name}'s issue", content = msg.clean_content, files = files)
 
@@ -73,7 +74,7 @@ class Forums(commands.Cog):
             if message.author != msg.author or message == ctx.message:
                 break
 
-            files = [await file.to_file() for file in message.attachments]
+            files = await asyncio.gather(*[file.to_file() for file in message.attachments])
             await thread.send(content = message.clean_content, files = files)
 
             await message.delete()
