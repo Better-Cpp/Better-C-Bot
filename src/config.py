@@ -43,7 +43,9 @@ ping_role = 873897990958481448
 # Role that can reactivate and close help channels without having to own the channel
 helpful_role = 983185446047719504
 
+help_channel = 1045182836107395124
+
 closeable = {
-  1045182836107395124 : 'Done', # help
+  help_channel : 'Done', # help
   1055500115432972318 : 'Done'  # code-review
 }
