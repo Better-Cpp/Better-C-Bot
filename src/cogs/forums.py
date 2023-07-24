@@ -1,4 +1,5 @@
 import asyncio
+import itertools
 
 from discord.ext import commands
 import discord
@@ -57,6 +58,8 @@ class Forums(commands.Cog):
     async def tohelp(self, ctx: commands.Context):
         """Move misplaced help request to #help by replying the command to the first message to be moved"""
 
+        assert isinstance(ctx.channel, discord.TextChannel)
+
         assert ctx.message.reference
         msg = ctx.message.reference
 
@@ -64,22 +67,39 @@ class Forums(commands.Cog):
         msg = msg.resolved
 
         channel: discord.ForumChannel = self.bot.get_channel(conf.help_channel)
-        files = await asyncio.gather(*[file.to_file() for file in msg.attachments])
 
-        thread, _ = await channel.create_thread(name = f"{msg.author.display_name}'s issue", content = msg.clean_content, files = files)
+        async def to_msg_data(message):
+            msgs = []
 
-        await thread.add_user(msg.author)
+            if message.clean_content:
+                avatar = message.author.display_avatar
+                author = message.author.display_name
+                embed = discord.Embed(description=message.clean_content, timestamp=message.created_at).set_author(name=author, icon_url=avatar)
 
+                msgs.append({"embeds": [embed]})
+
+            files = await asyncio.gather(*[file.to_file() for file in message.attachments])
+            if files:
+                msgs.append({"files": files})
+
+            return msgs
+
+        msgs = [msg]
         async for message in msg.channel.history(after=msg, limit=20):
             if message.author != msg.author or message == ctx.message:
                 break
 
-            files = await asyncio.gather(*[file.to_file() for file in message.attachments])
-            await thread.send(content = message.clean_content, files = files)
+            msgs.append(message)
 
-            await message.delete()
+        data = list(itertools.chain.from_iterable(await asyncio.gather(*[to_msg_data(msg) for msg in msgs])))
 
-        await msg.delete()
+        thread, _ = await channel.create_thread(name = f"{msg.author.display_name}'s issue", **data.pop(0))
+
+        for msg_data in data:
+            await thread.send(**msg_data)
+
+        # Can't delete messages older than 14 days or more than 100 at a time
+        await asyncio.gather(ctx.channel.delete_messages(msgs), thread.add_user(msg.author))
 
         await ctx.send(f"<@{msg.author.id}> asking questions in the wrong place will get your question buried, so make sure to create a thread in our help forum. That way, you can keep track of all relevant information pertaining to your question. Your help request was thus moved to the appropriate channel under <#{thread.id}>")
 
