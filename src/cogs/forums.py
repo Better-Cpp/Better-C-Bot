@@ -60,6 +60,10 @@ class Forums(commands.Cog):
 
         assert isinstance(ctx.channel, discord.TextChannel)
 
+        if not (permissions.is_staff(ctx.author, ctx.channel) \
+                or permissions.has_role(ctx.author, conf.helpful_role)):
+            return
+
         assert ctx.message.reference
         msg = ctx.message.reference
 
