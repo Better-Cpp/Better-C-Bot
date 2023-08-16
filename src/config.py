@@ -45,6 +45,8 @@ helpful_role = 983185446047719504
 
 help_channel = 1045182836107395124
 
+modmail_channel = 1141379602724442223
+
 closeable = {
   help_channel : 'Done', # help
   1055500115432972318 : 'Done'  # code-review
