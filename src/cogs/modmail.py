@@ -2,7 +2,6 @@ import discord
 from discord.ext import commands
 from discord.ui import Button, View, Modal
 from random import randrange
-import time
 from src import config as conf
 from src.util import permissions
 
@@ -42,7 +41,7 @@ class ModmailModal(Modal):
             )
 
         await interaction.response.send_message(
-            f"Channel created in <t:{int(time.time())}:f>\n{created_thread.jump_url}", 
+            f"Channel created at: {created_thread.jump_url}", 
             ephemeral = True
         )
 
