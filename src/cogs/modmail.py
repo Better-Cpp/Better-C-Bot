@@ -71,7 +71,7 @@ class Modmail(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.command()
+    @commands.command(hidden = True)
     async def modmail(self, ctx, channel: discord.TextChannel):
         if not permissions.is_staff(ctx.author, ctx.channel):
             return
