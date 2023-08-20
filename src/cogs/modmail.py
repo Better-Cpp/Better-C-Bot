@@ -61,7 +61,7 @@ class ModmailView(View):
 
     @discord.ui.button(label = "Create ticket", custom_id = "persistent_view:create_ticket")
     async def button_callback(self, interaction, button):
-        if len(self.children[0].values) == 0:
+        if not self.children[0].values:
             await interaction.response.send_message("Please select an option", ephemeral = True)
             return
 
