@@ -29,10 +29,17 @@ class ModmailModal(Modal):
         embed.set_author(name = user.name, icon_url = user.avatar.url)
 
         await created_thread.add_user(user)
-        await created_thread.send(
-            f"{user.mention} please wait for <@&{conf.staff_role}> to respond.\n",
-            embeds = [embed]
-        )
+
+        if self.selected == "There's an issue with a moderative action":
+            await created_thread.send(
+                f"{user.mention} please wait for <@&{conf.admin_role}> to respond.\n",
+                embeds = [embed]
+            )
+        else:
+            await created_thread.send(
+                f"{user.mention} please wait for <@&{conf.staff_role}> to respond.\n",
+                embeds = [embed]
+            )
 
         await interaction.response.send_message(
             f"Channel created in <t:{int(time.time())}:f>\n{created_thread.jump_url}", 

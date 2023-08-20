@@ -3,6 +3,7 @@ from datetime import timedelta
 # Elevated permissions
 # John, Che, Andy, Gemu
 permitted = [553478921870508061, 176681843356073985, 806272111076835381, 135215807532630016]
+admin_role = 940645400287785031
 staff_role = 583646707938623489
 
 # General
