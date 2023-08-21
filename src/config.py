@@ -3,6 +3,7 @@ from datetime import timedelta
 # Elevated permissions
 # John, Che, Andy, Gemu
 permitted = [553478921870508061, 176681843356073985, 806272111076835381, 135215807532630016]
+admin_role = 583253012722483210
 staff_role = 583646707938623489
 
 # General
@@ -44,6 +45,8 @@ ping_role = 873897990958481448
 helpful_role = 983185446047719504
 
 help_channel = 1045182836107395124
+
+modmail_channel = 583301260006916099 # rules
 
 closeable = {
   help_channel : 'Done', # help

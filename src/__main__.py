@@ -29,6 +29,7 @@ async def on_ready():
         "src.cogs.admin",
         "src.cogs.error_handler",
         "src.cogs.snipe",
+        "src.cogs.modmail"
     ]
     for cog in bot.user_cogs:
         print(f"Loading {cog}...")
