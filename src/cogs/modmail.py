@@ -60,11 +60,12 @@ class ModmailView(View):
 
     @discord.ui.button(label = "Create ticket", custom_id = "persistent_view:create_ticket")
     async def button_callback(self, interaction, button):
-        if not self.children[0].values:
-            await interaction.response.send_message("Please select an option", ephemeral = True)
-            return
+        for child in self.children:
+            if isinstance(child, discord.ui.Select) and child.values:
+                await interaction.response.send_modal(ModmailModal(child.values[0]))
+                return
 
-        await interaction.response.send_modal(ModmailModal(self.children[0].values[0]))
+        await interaction.response.send_message("Please select an option", ephemeral = True)
 
 class Modmail(commands.Cog):
     def __init__(self, bot):
