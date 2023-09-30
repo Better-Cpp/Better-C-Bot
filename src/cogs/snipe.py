@@ -25,11 +25,18 @@ class Sniper(commands.Cog, name="Snipe"):
         self._message_history: dict[int, list[discord.Message]] = defaultdict(lambda: deque(maxlen=conf.max_edit_msg))
 
     @commands.hybrid_command(with_app_command=True)
-    async def snipe(self, ctx: Context, number: int = 0):
-        if ctx.channel.id not in self._deleted:
-            return await ctx.send("No message to snipe.")
+    async def snipe(self, ctx: Context, number: int = 0, channel: int = 0):
+        if channel == 0:
+            if ctx.channel.id not in self._deleted:
+                return await ctx.send("No message to snipe.")
 
-        deleted_msgs = self._deleted[ctx.channel.id]
+            deleted_msgs = self._deleted[ctx.channel.id]
+        else:
+            if channel not in self._deleted:
+                return await ctx.send("No message to snipe.")
+
+            deleted_msgs = self._deleted[channel]
+
         index = abs(number)
 
         if index >= len(deleted_msgs):
