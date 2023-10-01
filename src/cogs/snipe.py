@@ -15,6 +15,8 @@ class DeletedHistory:
     states: list[discord.Message]
 
 class Sniper(commands.Cog, name="Snipe"):
+    Snipeable = discord.TextChannel | discord.VoiceChannel | discord.StageChannel | discord.Thread
+
     def __init__(self, bot):
         self.bot = bot
 
@@ -25,7 +27,7 @@ class Sniper(commands.Cog, name="Snipe"):
         self._message_history: dict[int, list[discord.Message]] = defaultdict(list)
 
     @commands.hybrid_command(with_app_command=True)
-    async def snipe(self, ctx: Context, number: int = 0, channel: discord.TextChannel | discord.VoiceChannel | discord.StageChannel | discord.Thread | None = None):
+    async def snipe(self, ctx: Context, number: int = 0, channel: Snipeable | None = None):
         req_perms = discord.Permissions(send_messages = True, view_channel = True)
 
         if channel and (
@@ -68,8 +70,8 @@ class Sniper(commands.Cog, name="Snipe"):
 
     @commands.hybrid_command()
     @commands.has_role(conf.staff_role)
-    async def clear(self, ctx: Context):
-        del self._deleted[ctx.channel.id]
+    async def clear(self, ctx: Context, channel: Snipeable | None = None):
+        del self._deleted[channel.id if channel else ctx.channel.id]
 
         await ctx.send("Cleared snipe buffer")
 
