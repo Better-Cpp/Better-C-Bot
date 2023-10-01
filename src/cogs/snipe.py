@@ -25,11 +25,20 @@ class Sniper(commands.Cog, name="Snipe"):
         self._message_history: dict[int, list[discord.Message]] = defaultdict(list)
 
     @commands.hybrid_command(with_app_command=True)
-    async def snipe(self, ctx: Context, number: int = 0):
-        if ctx.channel.id not in self._deleted:
+    async def snipe(self, ctx: Context, number: int = 0, channel: discord.TextChannel | discord.VoiceChannel | discord.StageChannel | discord.Thread | None = None):
+        req_perms = discord.Permissions(send_messages = True, view_channel = True)
+
+        if channel and (
+            not isinstance(ctx.author, discord.Member)
+            or not req_perms.is_subset(channel.permissions_for(ctx.author))
+        ):
+            return await ctx.send("You do not have the permissions required to snipe this channel.")
+
+        chan_id = channel.id if channel else ctx.channel.id
+        if chan_id not in self._deleted:
             return await ctx.send("No message to snipe.")
 
-        deleted_msgs = self._deleted[ctx.channel.id]
+        deleted_msgs = self._deleted[chan_id]
         index = abs(number)
 
         if index >= len(deleted_msgs):
