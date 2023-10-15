@@ -24,6 +24,8 @@ class Sniper(commands.Cog, name="Snipe"):
         # Maps message id : history of edited message
         self._message_history: dict[int, list[discord.Message]] = defaultdict(lambda: deque(maxlen=conf.max_edit_msg))
 
+        self.clean_edits.start()
+
     @commands.hybrid_command(with_app_command=True)
     async def snipe(self, ctx: Context, number: int = 0):
         if ctx.channel.id not in self._deleted:

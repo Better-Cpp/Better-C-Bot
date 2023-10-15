@@ -39,7 +39,11 @@ class Forums(commands.Cog):
 
         if ctx.author == ctx.channel.owner \
                 or permissions.is_staff(ctx.author, ctx.channel) \
-                or permissions.has_role(ctx.author, conf.helpful_role):
+                or permissions.has_role(ctx.author, conf.helpful_role) \
+                or (
+                    ctx.channel.owner == self.bot.user
+                    and ctx.author in (await ctx.channel.fetch_message(ctx.channel.id)).mentions
+                ):
 
             apply_tags = {}
             if ctx.channel.parent.id in self.mapping:
@@ -59,6 +63,10 @@ class Forums(commands.Cog):
         """Move misplaced help request to #help by replying the command to the first message to be moved"""
 
         assert isinstance(ctx.channel, discord.TextChannel)
+
+        if not permissions.is_staff(ctx.author, ctx.channel) \
+            and not permissions.has_role(ctx.author, conf.helpful_role):
+            return
 
         assert ctx.message.reference
         msg = ctx.message.reference
@@ -93,7 +101,7 @@ class Forums(commands.Cog):
 
         data = list(itertools.chain.from_iterable(await asyncio.gather(*[to_msg_data(msg) for msg in msgs])))
 
-        thread, _ = await channel.create_thread(name = f"{msg.author.display_name}'s issue", **data.pop(0))
+        thread, _ = await channel.create_thread(name = f"{msg.author.display_name}'s issue", content = f"The following messages were originally posted by <@{msg.author.id}> in <#{ctx.channel.id}>:")
 
         for msg_data in data:
             await thread.send(**msg_data)
