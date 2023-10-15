@@ -19,10 +19,10 @@ class Sniper(commands.Cog, name="Snipe"):
         self.bot = bot
 
         # Maps channel : list of history of deleted messages
-        self._deleted: dict[int, deque[DeletedHistory]] = defaultdict(lambda: deque(maxlen=conf.max_del_msgs))
+        self._deleted: defaultdict[int, deque[DeletedHistory]] = defaultdict(lambda: deque(maxlen=conf.max_del_msgs))
 
         # Maps message id : history of edited message
-        self._message_history: dict[int, list[discord.Message]] = defaultdict(lambda: deque(maxlen=conf.max_edit_msg))
+        self._message_history: defaultdict[int, deque[discord.Message]] = defaultdict(lambda: deque(maxlen=conf.max_edit_msg))
 
         self.clean_edits.start()
 
@@ -62,7 +62,7 @@ class Sniper(commands.Cog, name="Snipe"):
         history = self._message_history[ctx.message.reference.message_id]
 
         reply = ctx.message
-        for embeds in into_embeds_chunks(history):
+        for embeds in into_embeds_chunks(list(history)):
             reply = await reply.reply(embeds=embeds)
 
     @commands.hybrid_command()
@@ -80,8 +80,8 @@ class Sniper(commands.Cog, name="Snipe"):
     @commands.Cog.listener()
     async def on_message_delete(self, message: discord.Message):
         history = []
-        if message.id in self._message_history:
-            history = self._message_history.pop(message.id)
+        if old := self._message_history.pop(message.id, None):
+            history = list(old)
 
         history.append(message)
 
@@ -94,10 +94,10 @@ class Sniper(commands.Cog, name="Snipe"):
     @tasks.loop(minutes=5)
     async def clean_edits(self):
         now = datetime.utcnow()
-        self._message_history = {
+        self._message_history = defaultdict(lambda: deque(maxlen=conf.max_edit_msg), {
             k: v for k, v in self._message_history.items()
             if timestamp(v[-1]).replace(tzinfo=None) > now - conf.max_edit_msg_age
-        }
+        })
 
         keep = {}
         retired = {}
@@ -113,7 +113,8 @@ class Sniper(commands.Cog, name="Snipe"):
                 if history.states[0].author.id not in retired],
                 maxlen=conf.max_del_msgs)
 
-        self._deleted = { chan_id: remove_malicious(histories) for chan_id, histories in self._deleted.items() }
+        self._deleted = defaultdict(lambda: deque(maxlen=conf.max_del_msgs),
+                                    { chan_id: remove_malicious(histories) for chan_id, histories in self._deleted.items() })
 
         self._recently_banned = keep
 
