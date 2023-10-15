@@ -32,6 +32,7 @@ class Sniper(commands.Cog, name="Snipe"):
 
         if channel and (
             not isinstance(ctx.author, discord.Member)
+            or not conf.staff_role in [role.id for role in ctx.author.roles]
             or not req_perms.is_subset(channel.permissions_for(ctx.author))
         ):
             return await ctx.send("You do not have the permissions required to snipe this channel.")
