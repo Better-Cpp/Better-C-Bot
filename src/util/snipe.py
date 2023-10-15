@@ -27,4 +27,3 @@ def into_embeds_chunks(history: list[discord.Message]):
             cur_length += length
 
     return messages
-    
