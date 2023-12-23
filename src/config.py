@@ -52,3 +52,7 @@ closeable = {
   help_channel : 'Done', # help
   1055500115432972318 : 'Done'  # code-review
 }
+
+user_db_path = "users.db"
+
+daily_amount = 10
