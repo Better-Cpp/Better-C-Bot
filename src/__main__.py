@@ -15,7 +15,7 @@ bot = commands.Bot(prefix, case_insensitive=True,
 
 @bot.event
 async def on_ready():
-    bot.user_db = Database(conf.user_db_path)
+    bot.db = Database(conf.database_path)
 
     bot.user_cogs = [
         # "src.cogs.verona",

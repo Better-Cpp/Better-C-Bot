@@ -53,6 +53,8 @@ closeable = {
   1055500115432972318 : 'Done'  # code-review
 }
 
-user_db_path = "users.db"
+database_path = "database.db"
 
 daily_amount = 10
+
+wallet_sticker_id = 1188841359927427092

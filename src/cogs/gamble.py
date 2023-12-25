@@ -1,18 +1,18 @@
 import random
 import time
+import datetime
 
 from discord.ext import commands
 import discord
 from discord.ext.commands import Context
 from discord import Member
-from datetime import datetime
 
 from src import config as conf
 
 class Gamble(commands.Cog, name="Gamble"):
     def __init__(self, bot):
         self.bot = bot
-        self.db = bot.user_db
+        self.db = bot.db
 
     @commands.Cog.listener()
     async def on_command_error(self, ctx: Context, error):
@@ -71,8 +71,10 @@ class Gamble(commands.Cog, name="Gamble"):
 
         self.db.check_user(user.id)
 
+        sticker_url = f"https://cdn.discordapp.com/stickers/{conf.wallet_sticker_id}.png"
+
         embed = discord.Embed(title=f"{user.display_name}'s wallet", color=discord.Color.blurple())
-        embed.set_thumbnail(url="https://cdn.iconscout.com/icon/free/png-512/free-wallet-588-456730.png")
+        embed.set_thumbnail(url=sticker_url)
         embed.add_field(name="Money", value=f"{self.db.get_user_field('money', user.id)}$")
 
         await ctx.send(embed=embed)
@@ -90,8 +92,9 @@ class Gamble(commands.Cog, name="Gamble"):
         seconds_since_last_daily = current_timestamp - last_daily_timestamp
 
         if seconds_since_last_daily < seconds_in_a_day:
-            formatted_time = datetime.fromtimestamp(seconds_in_a_day - seconds_since_last_daily).strftime("%Hh %Mm %Ss")
-            await ctx.send(f"You need to wait `{formatted_time}` before you can use this again.", ephemeral=True)
+            seconds_to_wait = seconds_in_a_day - seconds_since_last_daily
+
+            await ctx.send(f"You need to wait `{str(datetime.timedelta(seconds=seconds_to_wait))}` before you can use this again.", ephemeral=True)
             return
         
         # Update timestamp and add money to user"s wallet.
