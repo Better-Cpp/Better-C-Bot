@@ -57,4 +57,4 @@ database_path = "database.db"
 
 daily_amount = 10
 
-wallet_sticker_id = 1188841359927427092
+wallet_sticker_id = 1193982589556490440

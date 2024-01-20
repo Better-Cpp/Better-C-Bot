@@ -54,11 +54,11 @@ class Gamble(commands.Cog, name="Gamble"):
 
         if won:
             embed = discord.Embed(title="You won!", color=discord.Color.green())
-            embed.add_field(name=f"{amount_to_bet}$ has been added to your wallet", value=f"You have {amount_result}$")
+            embed.add_field(name=f"${amount_to_bet} has been added to your wallet", value=f"You have ${amount_result}")
             await ctx.send(embed=embed)
         else:
             embed = discord.Embed(title="You lost.", color=discord.Color.red())
-            embed.add_field(name=f"{amount_to_bet}$ has been removed from your wallet", value=f"You have {amount_result}$")
+            embed.add_field(name=f"${amount_to_bet} has been removed from your wallet", value=f"You have ${amount_result}")
             await ctx.send(embed=embed)
     
     @commands.hybrid_command(with_app_command=True)
@@ -75,7 +75,7 @@ class Gamble(commands.Cog, name="Gamble"):
 
         embed = discord.Embed(title=f"{user.display_name}'s wallet", color=discord.Color.blurple())
         embed.set_thumbnail(url=sticker_url)
-        embed.add_field(name="Money", value=f"{self.db.get_user_field('money', user.id)}$")
+        embed.add_field(name="Money", value=f"${self.db.get_user_field('money', user.id)}")
 
         await ctx.send(embed=embed)
     
@@ -101,7 +101,7 @@ class Gamble(commands.Cog, name="Gamble"):
         self.db.set_user_field("last_daily_timestamp", current_timestamp, ctx.author.id, commit_changes=False)
         self.db.set_user_field("money", conf.daily_amount, ctx.author.id, commit_changes=True, add_value_instead=True)
 
-        await ctx.send(f"{ctx.author.mention} {conf.daily_amount}$ has been added to your wallet.")
+        await ctx.send(f"{ctx.author.mention} ${conf.daily_amount} has been added to your wallet.")
     
     @commands.hybrid_command(with_app_command=True)
     async def give(self, ctx: Context, user: Member, amount: int):
@@ -126,7 +126,7 @@ class Gamble(commands.Cog, name="Gamble"):
         self.db.set_user_field("money", -amount, ctx.author.id, commit_changes=False, add_value_instead=True)
         self.db.set_user_field("money", amount, user.id, commit_changes=True, add_value_instead=True)
 
-        await ctx.send(f"Transferred {amount}$ from {ctx.author.display_name} to {user.display_name}")
+        await ctx.send(f"Transferred ${amount} from {ctx.author.display_name} to {user.display_name}")
 
     @commands.hybrid_command(with_app_command=True)
     async def leaderboard(self, ctx: Context, max_entries: int = 10):
@@ -143,7 +143,7 @@ class Gamble(commands.Cog, name="Gamble"):
         for index, entry in enumerate(entries):
             user_id = entry[0]
             user_money = entry[1]
-            member_list += f"{index + 1}. {self.bot.get_user(user_id).mention} {user_money}$\n"
+            member_list += f"{index + 1}. {self.bot.get_user(user_id).mention} ${user_money}\n"
 
         embed = discord.Embed(title="Leaderboard", color=discord.Color.blurple())
         embed.add_field(name=f"Showing top {max_entries} members", value=member_list)
