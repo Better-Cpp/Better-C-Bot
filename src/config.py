@@ -52,3 +52,9 @@ closeable = {
   help_channel : 'Done', # help
   1055500115432972318 : 'Done'  # code-review
 }
+
+database_path = "database.db"
+
+daily_amount = 10
+
+wallet_sticker_id = 1193982589556490440

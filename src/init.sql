@@ -1,0 +1,5 @@
+CREATE TABLE IF NOT EXISTS users(
+    id INTEGER NOT NULL PRIMARY KEY, 
+    money INTEGER NOT NULL, 
+    last_daily_timestamp INTEGER NOT NULL
+);
